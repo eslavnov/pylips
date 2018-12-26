@@ -124,6 +124,15 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 [The API reference (work in progress)](https://github.com/eslavnov/Pylips/wiki).
 
+## TO-DO
+1. Finish documenting and testing all available API endpoints (January 2019)
+2. Increase number of built-in commands
+3. Improve error handling when sending requests
+4. User-friendly way of changing Ambilight colors
+5. Move settings to a config file
+6. MQTT server support
+7. Home assistant integration
+
 ## Acknowledgements
 1. TV pairing mechanism as well as the inspiration for this tool come from [@suborb](https://github.com/suborb)'s brilliant [repo](https://github.com/suborb/philips_android_tv).
 2. This tool was also inspired by [@arzzen](https://github.com/arzzen)'s CLI [tool](https://github.com/arzzen/philips-tv).
