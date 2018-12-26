@@ -129,9 +129,9 @@ The TV's API is roughly based on [JointSpace](http://jointspace.sourceforge.net/
 Since no official API documentation is available, I've decided to collect and document to the best of my knowledge all endpoints that are working in API version 6+ (Philips TVs 2016-2018). This API reference is based on:
 * [Official JointSpace documentation](http://jointspace.sourceforge.net/projectdata/documentation/jasonApi/1/doc/API.html)
 * Community endpoints (various endpoints discovered by the community over the years)
-* Endpoints discovered by using a man-in-the-middle attack on an iPhone running an official Philips TV remote app (this finally allowed to discover an endpoint responsible for toggling 'Ambilight + Hue' mode)
+* Endpoints discovered by using a man-in-the-middle attack on an iPhone running an official Philips TV remote app (this finally allowed to discover an endpoint responsible for toggling 'Ambilight + Hue' mode among other things)
 
-All endpoints in API reference are tested and fully working unless explicitly marked otherwise. Some channel endpoints are missing since I can not test them until January 2018. Any comments, new endpoints and fixes to the API reference are incredibly welcome.
+All endpoints in API reference are tested and fully working unless explicitly marked otherwise. Some channel endpoints are missing since I can not test them until January 2019. Any comments, new endpoints and fixes to the API reference are incredibly welcome.
 
 [The API reference (work in progress)](https://github.com/eslavnov/Pylips/wiki).
 
