@@ -166,8 +166,15 @@ def main():
     config['device_id'] = args.user
     config['auth_key'] = args.password
 
-    # Built-in commands (basically wrappers around common API calls)
-    available_commands ={
+    # Built-in GET commands (basically wrappers around common API calls)
+    available_commands_get={
+        "list_channels": {
+            "path": "channeldb/tv/channelLists/all"
+        }
+    }
+
+    # Built-in POST commands (basically wrappers around common API calls)
+    available_commands_post ={
         "ambilight_on": {
             "path": "ambilight/power",
             "body": {
@@ -360,10 +367,6 @@ def main():
                 ]
             }
         },
-        "list_channels": {
-            "path": "channeldb/tv/channelLists/all",
-            "body": {}
-        },
         "standby": {
             "path": "input/key",
             "body": {
@@ -480,10 +483,14 @@ def main():
         }
     }
 
-    if args.command in available_commands:
-        config['path'] = available_commands[args.command]['path']
-        config['body'] = available_commands[args.command]['body']
+    if args.command in available_commands_post:
+        config['path'] = available_commands_post[args.command]['path']
+        config['body'] = available_commands_post[args.command]['body']
         post(config)
+
+    elif args.command in available_commands_get:
+        config['path'] = available_commands_get[args.command]['path']
+        get(config)
 
     # a general GET request for custom commands
     elif args.command == "get":
@@ -504,6 +511,6 @@ def main():
 
     else:
         print("Unknown command", args.command)
-        
+
 if __name__ == '__main__':
     main()
