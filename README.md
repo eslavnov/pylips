@@ -87,7 +87,7 @@ python pylips.py --host %TV's_ip_address% --user %username% --password %password
 1. `cursor_right` - Sends CursorRight key
 1. `confirm` - Sends Confirm key
 
-Examples of using the built-in commands:
+**Examples of using the built-in commands:**
 
 Send Stop key:
 ```
@@ -103,10 +103,10 @@ python pylips.py --host %TV's_ip_address% --user %username% --password %password
 The tools exposes two general commands to talk to the TV's API: `get` (sends GET request and *gets* back some data like ambilight mode) and `post` (sends POST request that *posts* some data and changes something in the TV - like turning the ambilight off).
 
 Read the API reference first to understand available endpoints and how to use them. There are some unexpected things like:
+* Pairing process returns objects like '{"error_id":"SUCCESS"}'
 * POST requests that do not mutate anything and generally behave like GET requests (why, Philips?!)
 * Using strings like 'On'/'Off' for boolean variables (really, Philips?!)
 * API returns 'Nodeid' for some GET requests, while expecting 'nodeid' for POST requests (come on, Philips has to do it all on purpose, right? Right?)
-* Pairing process returns objects like '{"error_id":"SUCCESS"}'...
 
 **Get method:**
 
