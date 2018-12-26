@@ -40,7 +40,7 @@ You can take advantage of some of the built-in commands (to be extended) or send
 
 ### Built-in commands ###
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --password %password% --command %command%
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command %command%
 ```
 
 **Available built-in commands:**
@@ -91,12 +91,12 @@ python pylips.py --host %TV's_ip_address% --user %username% --password %password
 
 Send Stop key:
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --password %password% --command stop
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command stop
 ```
 
 Turn Ambilight on:
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --password %password% --command ambilight_on
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command ambilight_on
 ```
 
 ### Custom commands ###
@@ -113,7 +113,7 @@ Read the API reference first to understand available endpoints and how to use th
 To use the `get` method you need to provide a path to the required endpoint with a `--path` argument. For example, this will send a get request to the `system` endpoint (https://yourIP:1926/6/system):
 
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --password %password% --command get --path system
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command get --path system
 ```
 
 **Post method:**
@@ -121,7 +121,7 @@ python pylips.py --host %TV's_ip_address% --user %username% --password %password
 To use the `post` method you need to provide a path to the required endpoint with a `--path` argument and the body of your POST request with a `--body` argument. For example, this will send a post request to the `menuitems/settings/current` endpoint with a body that will get back the status of 'Ambilight + Hue' (notice that the `--body` argument **needs to come inside the quotes**):
 
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --password %password% --command get --path menuitems/settings/current --body '{"nodes":[{"nodeid":2131230774}]}'
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command get --path menuitems/settings/current --body '{"nodes":[{"nodeid":2131230774}]}'
 ```
 ## API reference
 The TV's API is roughly based on [JointSpace](http://jointspace.sourceforge.net/) with a current version of 6.2. The only available official documentation that I was able to find is for JointSpace version 1, which is incredibly outdated. 
