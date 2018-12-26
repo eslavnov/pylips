@@ -5,6 +5,17 @@ There are some similar modules available, but they lack documentation, miss some
 
 **It is also the only module that allows toggling 'Ambilight + Hue' setting.**
 
+## Table of contents ##
+1. [Prerequisites](#prerequisites)
+1. [Pairing with the TV](#pairing-with-the-tv)
+1. [Controlling the TV](#controlling-the-tv)
+    1. [Built-in commands](#built-in-commands)
+    1. [Custom commands](#custom-commands)
+1. [API reference](#api-reference)
+1. [TO-DO](#to-do)
+1. [Acknowledgements](#Acknowledgements)
+1. [Contact details](#contact-details)
+
 ## Prerequisites
 
 Provided that you have python (version 3+) on your system, install all the dependencies first:
@@ -25,11 +36,11 @@ The TV will display a 4-digit pin-code that you need to input to get a username 
 **Write down the username and password since they are required for all future calls!**
 
 ## Controlling the TV ##
-You can take advantage of some of the built-in commands (to be extended) or send your own.
+You can take advantage of some of the built-in commands (to be extended) or send your own custom commands.
 
-### Built-in commands: ###
+### Built-in commands ###
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --password %password% --command %command%
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command %command%
 ```
 
 **Available built-in commands:**
@@ -76,33 +87,33 @@ python pylips.py --host %TV's_ip_address% --user %username% --password %password
 1. `cursor_right` - Sends CursorRight key
 1. `confirm` - Sends Confirm key
 
-Examples of using the built-in commands:
+**Examples of using the built-in commands:**
 
 Send Stop key:
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --password %password% --command stop
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command stop
 ```
 
 Turn Ambilight on:
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --password %password% --command ambilight_on
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command ambilight_on
 ```
 
-### Custom commands: ###
+### Custom commands ###
 The tools exposes two general commands to talk to the TV's API: `get` (sends GET request and *gets* back some data like ambilight mode) and `post` (sends POST request that *posts* some data and changes something in the TV - like turning the ambilight off).
 
 Read the API reference first to understand available endpoints and how to use them. There are some unexpected things like:
+* Pairing process returns objects like '{"error_id":"SUCCESS"}'
 * POST requests that do not mutate anything and generally behave like GET requests (why, Philips?!)
 * Using strings like 'On'/'Off' for boolean variables (really, Philips?!)
 * API returns 'Nodeid' for some GET requests, while expecting 'nodeid' for POST requests (come on, Philips has to do it all on purpose, right? Right?)
-* Pairing process returns objects like '{"error_id":"SUCCESS"}'...
 
 **Get method:**
 
 To use the `get` method you need to provide a path to the required endpoint with a `--path` argument. For example, this will send a get request to the `system` endpoint (https://yourIP:1926/6/system):
 
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --password %password% --command get --path system
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command get --path system
 ```
 
 **Post method:**
@@ -110,7 +121,7 @@ python pylips.py --host %TV's_ip_address% --user %username% --password %password
 To use the `post` method you need to provide a path to the required endpoint with a `--path` argument and the body of your POST request with a `--body` argument. For example, this will send a post request to the `menuitems/settings/current` endpoint with a body that will get back the status of 'Ambilight + Hue' (notice that the `--body` argument **needs to come inside the quotes**):
 
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --password %password% --command get --path menuitems/settings/current --body '{"nodes":[{"nodeid":2131230774}]}'
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command get --path menuitems/settings/current --body '{"nodes":[{"nodeid":2131230774}]}'
 ```
 ## API reference
 The TV's API is roughly based on [JointSpace](http://jointspace.sourceforge.net/) with a current version of 6.2. The only available official documentation that I was able to find is for JointSpace version 1, which is incredibly outdated. 
@@ -118,9 +129,9 @@ The TV's API is roughly based on [JointSpace](http://jointspace.sourceforge.net/
 Since no official API documentation is available, I've decided to collect and document to the best of my knowledge all endpoints that are working in API version 6+ (Philips TVs 2016-2018). This API reference is based on:
 * [Official JointSpace documentation](http://jointspace.sourceforge.net/projectdata/documentation/jasonApi/1/doc/API.html)
 * Community endpoints (various endpoints discovered by the community over the years)
-* Endpoints discovered by using a man-in-the-middle attack on an iPhone running an official Philips TV remote app (this finally allowed to discover an endpoint responsible for toggling 'Ambilight + Hue' mode)
+* Endpoints discovered by using a man-in-the-middle attack on an iPhone running an official Philips TV remote app (this finally allowed to discover an endpoint responsible for toggling 'Ambilight + Hue' mode among other things)
 
-All endpoints in API reference are tested and fully working unless explicitly marked otherwise. Some channel endpoints are missing since I can not test them until January 2018. Any comments, new endpoints and fixes to the API reference are incredibly welcome.
+All endpoints in API reference are tested and fully working unless explicitly marked otherwise. Some channel endpoints are missing since I can not test them until January 2019. Any comments, new endpoints and fixes to the API reference are incredibly welcome.
 
 [The API reference (work in progress)](https://github.com/eslavnov/Pylips/wiki).
 
