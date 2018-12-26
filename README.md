@@ -5,6 +5,17 @@ There are some similar modules available, but they lack documentation, miss some
 
 **It is also the only module that allows toggling 'Ambilight + Hue' setting.**
 
+## Table of contents ##
+1. [Prerequisites](#prerequisites)
+1. [Pairing with the TV](#pairing-with-the-tv)
+1. [Controlling the TV](#controlling-the-tv)
+    1. [Built-in commands](#built-in-commands)
+    1. [Custom commands](#custom-commands)
+1. [API reference](#api-reference)
+1. [TO-DO](#to-do)
+1. [Acknowledgements](#Acknowledgements)
+1. [Contact details](#contact-details)
+
 ## Prerequisites
 
 Provided that you have python (version 3+) on your system, install all the dependencies first:
@@ -25,9 +36,9 @@ The TV will display a 4-digit pin-code that you need to input to get a username 
 **Write down the username and password since they are required for all future calls!**
 
 ## Controlling the TV ##
-You can take advantage of some of the built-in commands (to be extended) or send your own.
+You can take advantage of some of the built-in commands (to be extended) or send your own custom commands.
 
-### Built-in commands: ###
+### Built-in commands ###
 ```
 python pylips.py --host %TV's_ip_address% --user %username% --password %password% --command %command%
 ```
@@ -88,7 +99,7 @@ Turn Ambilight on:
 python pylips.py --host %TV's_ip_address% --user %username% --password %password% --command ambilight_on
 ```
 
-### Custom commands: ###
+### Custom commands ###
 The tools exposes two general commands to talk to the TV's API: `get` (sends GET request and *gets* back some data like ambilight mode) and `post` (sends POST request that *posts* some data and changes something in the TV - like turning the ambilight off).
 
 Read the API reference first to understand available endpoints and how to use them. There are some unexpected things like:
