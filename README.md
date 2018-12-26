@@ -95,6 +95,7 @@ Read the API reference first to understand available endpoints and how to use th
 * POST requests that do not mutate anything and generally behave like GET requests (why, Philips?!)
 * Using strings like 'On'/'Off' for boolean variables (really, Philips?!)
 * API returns 'Nodeid' for some GET requests, while expecting 'nodeid' for POST requests (come on, Philips has to do it all on purpose, right? Right?)
+* Pairing process returns objects like '{"error_id":"SUCCESS"}'...
 
 **Get method:**
 
