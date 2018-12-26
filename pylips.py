@@ -166,222 +166,334 @@ def main():
     config['device_id'] = args.user
     config['auth_key'] = args.password
 
-    # ambilight power
-    if args.command == "ambilight_on":
-        config['path'] = "ambilight/power"
-        config['body'] = { "power":"On"}
+    # Built-in commands (basically wrappers around common API calls)
+    available_commands ={
+        "ambilight_on": {
+            "path": "ambilight/power",
+            "body": {
+                "power": "On"
+            }
+        },
+        "ambilight_off": {
+            "path": "ambilight/power",
+            "body": {
+            "power": "Off"
+            }
+        },
+        "ambilight_video_immersive": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_VIDEO",
+                "isExpert": "false",
+                "menuSetting": "IMMERSIVE"
+            }
+        },
+        "ambilight_video_standard": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_VIDEO",
+                "isExpert": "false",
+                "menuSetting": "STANDARD"
+            }
+        },
+        "ambilight_video_natural": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_VIDEO",
+                "isExpert": "false",
+                "menuSetting": "NATURAL"
+            }
+        },
+        "ambilight_video_vivid": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_VIDEO",
+                "isExpert": "false",
+                "menuSetting": "VIVID"
+            }
+        },
+        "ambilight_video_game": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_VIDEO",
+                "isExpert": "false",
+                "menuSetting": "GAME"
+            }
+        },
+        "ambilight_video_comfort": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_VIDEO",
+                "isExpert": "false",
+                "menuSetting": "COMFORT"
+            }
+        },
+        "ambilight_video_relax": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_VIDEO",
+                "isExpert": "false",
+                "menuSetting": "RELAX"
+            }
+        },
+        "ambilight_audio_adapt_brightness": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_AUDIO",
+                "isExpert": "false",
+                "menuSetting": "ENERGY_ADAPTIVE_BRIGHTNESS"
+            }
+        },
+        "ambilight_audio_adapt_colors": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_AUDIO",
+                "isExpert": "false",
+                "menuSetting": "ENERGY_ADAPTIVE_COLORS"
+            }
+        },
+        "ambilight_audio_vu_meter": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_AUDIO",
+                "isExpert": "false",
+                "menuSetting": "VU_METER"
+            }
+        },
+        "ambilight_audio_spectrum": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_AUDIO",
+                "isExpert": "false",
+                "menuSetting": "SPECTRUM_ANALYZER"
+            }
+        },
+        "ambilight_audio_knight_rider_1": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_AUDIO",
+                "isExpert": "false",
+                "menuSetting": "KNIGHT_RIDER_CLOCKWISE"
+            }
+        },
+        "ambilight_audio_knight_rider_2": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_AUDIO",
+                "isExpert": "false",
+                "menuSetting": "KNIGHT_RIDER_ALTERNATING"
+            }
+        },
+        "ambilight_audio_flash": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_AUDIO",
+                "isExpert": "false",
+                "menuSetting": "RANDOM_PIXEL_FLASH"
+            }
+        },
+        "ambilight_audio_strobo": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_AUDIO",
+                "isExpert": "false",
+                "menuSetting": "STROBO"
+            }
+        },
+        "ambilight_audio_party": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_AUDIO",
+                "isExpert": "false",
+                "menuSetting": "PARTY"
+            }
+        },
+        "ambilight_audio_random": {
+            "path": "ambilight/currentconfiguration",
+            "body": {
+                "styleName": "FOLLOW_AUDIO",
+                "isExpert": "false",
+                "menuSetting": "MODE_RANDOM"
+            }
+        },
+        "ambihue_status": {
+            "path": "menuitems/settings/current",
+            "body": {
+                "nodes": [
+                    {
+                        "nodeid": 2131230774
+                    }
+                ]
+            }
+        },
+        "ambihue_on": {
+            "path": "menuitems/settings/update",
+            "body": {
+                "values": [
+                    {
+                        "value": {
+                            "Nodeid": 2131230774,
+                            "Controllable": "true",
+                            "Available": "true",
+                            "data": {
+                                "value": "true"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "ambihue_off": {
+            "path": "menuitems/settings/update",
+            "body": {
+                "values": [
+                    {
+                        "value": {
+                            "Nodeid": 2131230774,
+                            "Controllable": "true",
+                            "Available": "true",
+                            "data": {
+                                "value": "false"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "list_channels": {
+            "path": "channeldb/tv/channelLists/all",
+            "body": {}
+        },
+        "standby": {
+            "path": "input/key",
+            "body": {
+                "key": "Standby"
+            }
+        },
+        "mute": {
+            "path": "input/key",
+            "body": {
+                "key": "Mute"
+            }
+        },
+        "volume_up": {
+            "path": "input/key",
+            "body": {
+                "key": "VolumeUp"
+            }
+        },
+        "volume_down": {
+            "path": "input/key",
+            "body": {
+                "key": "VolumeDown"
+            }
+        },
+        "channel_up": {
+            "path": "input/key",
+            "body": {
+                "key": "ChannelStepUp"
+            }
+        },
+        "channel_down": {
+            "path": "input/key",
+            "body": {
+                "key": "ChannelStepDown"
+            }
+        },
+        "play": {
+            "path": "input/key",
+            "body": {
+                "key": "Play"
+            }
+        },
+        "pause": {
+            "path": "input/key",
+            "body": {
+                "key": "Pause"
+            }
+        },
+        "play_pause": {
+            "path": "input/key",
+            "body": {
+                "key": "PlayPause"
+            }
+        },
+        "stop": {
+            "path": "input/key",
+            "body": {
+                "key": "Stop"
+            }
+        },
+        "fast_forward": {
+            "path": "input/key",
+            "body": {
+                "key": "FastForward"
+            }
+        },
+        "rewind": {
+            "path": "input/key",
+            "body": {
+                "key": "Rewind"
+            }
+        },
+        "next": {
+            "path": "input/key",
+            "body": {
+                "key": "Next"
+            }
+        },
+        "previous": {
+            "path": "input/key",
+            "body": {
+                "key": "Previous"
+            }
+        },
+        "cursor_up": {
+            "path": "input/key",
+            "body": {
+                "key": "CursorUp"
+            }
+        },
+        "cursor_down": {
+            "path": "input/key",
+            "body": {
+                "key": "CursorDown"
+            }
+        },
+        "cursor_left": {
+            "path": "input/key",
+            "body": {
+                "key": "CursorLeft"
+            }
+        },
+        "cursor_right": {
+            "path": "input/key",
+            "body": {
+                "key": "CursorRight"
+            }
+        },
+        "confirm": {
+            "path": "input/key",
+            "body": {
+                "key": "Confirm"
+            }
+        }
+    }
+
+    if args.command in available_commands:
+        config['path'] = available_commands[args.command]['path']
+        config['body'] = available_commands[args.command]['body']
         post(config)
 
-    if args.command == "ambilight_off":
-        config['path'] = "ambilight/power"
-        config['body'] = { "power":"Off"}
-        post(config)
-
-    # ambilight video modes
-    if args.command == "ambilight_video_immersive":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_VIDEO","isExpert":"false","menuSetting":"IMMERSIVE"}
-        post(config)
-
-    elif args.command == "ambilight_video_standard":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_VIDEO","isExpert":"false","menuSetting":"STANDARD"}
-        post(config)
-
-    elif args.command == "ambilight_video_natural":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_VIDEO","isExpert":"false","menuSetting":"NATURAL"}
-        post(config)
-
-    elif args.command == "ambilight_video_vivid":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_VIDEO","isExpert":"false","menuSetting":"VIVID"}
-        post(config)
-
-    elif args.command == "ambilight_video_game":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_VIDEO","isExpert":"false","menuSetting":"GAME"}
-        post(config)
-
-    elif args.command == "ambilight_video_comfort":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_VIDEO","isExpert":"false","menuSetting":"COMFORT"}
-        post(config)
-
-    elif args.command == "ambilight_video_relax":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_VIDEO","isExpert":"false","menuSetting":"RELAX"}
-        post(config)
-
-    # ambilight audio modes
-    elif args.command == "ambilight_audio_adapt_brightness":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_AUDIO","isExpert":"false","menuSetting":"ENERGY_ADAPTIVE_BRIGHTNESS"}
-        post(config)
-
-    elif args.command == "ambilight_audio_adapt_colors":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_AUDIO","isExpert":"false","menuSetting":"ENERGY_ADAPTIVE_COLORS"}
-        post(config)
-
-    elif args.command == "ambilight_audio_vu_meter":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_AUDIO","isExpert":"false","menuSetting":"VU_METER"}
-        post(config)
-
-    elif args.command == "ambilight_audio_spectrum":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_AUDIO","isExpert":"false","menuSetting":"SPECTRUM_ANALYZER"}
-        post(config)
-
-    elif args.command == "ambilight_audio_knight_rider_1":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_AUDIO","isExpert":"false","menuSetting":"KNIGHT_RIDER_CLOCKWISE"}
-        post(config)
-
-    elif args.command == "ambilight_audio_knight_rider_2":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_AUDIO","isExpert":"false","menuSetting":"KNIGHT_RIDER_ALTERNATING"}
-        post(config)
-
-    elif args.command == "ambilight_audio_flash":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_AUDIO","isExpert":"false","menuSetting":"RANDOM_PIXEL_FLASH"}
-        post(config)
-
-    elif args.command == "ambilight_audio_strobo":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_AUDIO","isExpert":"false","menuSetting":"STROBO"}
-        post(config)
-
-    elif args.command == "ambilight_audio_party":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_AUDIO","isExpert":"false","menuSetting":"PARTY"}
-        post(config)
-
-    elif args.command == "ambilight_audio_random":
-        config['path'] = "ambilight/currentconfiguration"
-        config['body'] = {"styleName":"FOLLOW_AUDIO","isExpert":"false","menuSetting":"MODE_RANDOM"}
-        post(config)
-
-    #ambilight + hue controls
-    elif args.command == "ambihue_status":
-        config['path'] = "menuitems/settings/current"
-        config['body'] = {"nodes":[{"nodeid":2131230774}]}
-        post(config)
-
-    elif args.command == "ambihue_on":
-        config['path'] = "menuitems/settings/update"
-        config['body'] = {"values":[{"value":{"Nodeid":2131230774,"Controllable":"true","Available":"true","data":{"value":"true"}}}]}
-        post(config)
-
-    elif args.command == "ambihue_off":
-        config['path'] = "menuitems/settings/update"
-        config['body'] = {"values":[{"value":{"Nodeid":2131230774,"Controllable":"true","Available":"true","data":{"value":"false"}}}]}
-        post(config)
-
-    # get channels list
-    elif args.command == "list_channels":
-        config['path'] = "channeldb/tv/channelLists/all"
-        get(config)
-
-    # basic TV controls
-    elif args.command == "standby":
-        config['path'] = "input/key"
-        config['body'] = {"key":"Standby"}
-        post(config)
-    
-    elif args.command == "mute":
-        config['path'] = "input/key"
-        config['body'] = {"key":"Mute"}
-        post(config)
-
-    elif args.command == "volume_up":
-        config['path'] = "input/key"
-        config['body'] = {"key":"VolumeUp"}
-        post(config)
-
-    elif args.command == "volume_down":
-        config['path'] = "input/key"
-        config['body'] = {"key":"VolumeDown"}
-        post(config)
-
-    elif args.command == "channel_up":
-        config['path'] = "input/key"
-        config['body'] = {"key":"ChannelStepUp"}
-        post(config)
-
-    elif args.command == "channel_down":
-        config['path'] = "input/key"
-        config['body'] = {"key":"ChannelStepDown"}
-        post(config)
-
-    elif args.command == "play":
-        config['path'] = "input/key"
-        config['body'] = {"key":"Play"}
-        post(config)
-
-    elif args.command == "pause":
-        config['path'] = "input/key"
-        config['body'] = {"key":"Pause"}
-        post(config)
-
-    elif args.command == "play_pause":
-        config['path'] = "input/key"
-        config['body'] = {"key":"PlayPause"}
-        post(config)
-
-    elif args.command == "stop":
-        config['path'] = "input/key"
-        config['body'] = {"key":"Stop"}
-        post(config)
-
-    elif args.command == "fast_forward":
-        config['path'] = "input/key"
-        config['body'] = {"key":"FastForward"}
-        post(config)
-
-    elif args.command == "rewind":
-        config['path'] = "input/key"
-        config['body'] = {"key":"Rewind"}
-        post(config)
-
-    elif args.command == "next":
-        config['path'] = "input/key"
-        config['body'] = {"key":"Next"}
-        post(config)
-
-    elif args.command == "previous":
-        config['path'] = "input/key"
-        config['body'] = {"key":"Previous"}
-        post(config)
-
-    elif args.command == "cursor_up":
-        config['path'] = "input/key"
-        config['body'] = {"key":"CursorUp"}
-        post(config)
-
-    elif args.command == "cursor_down":
-        config['path'] = "input/key"
-        config['body'] = {"key":"CursorDown"}
-        post(config)
-
-    elif args.command == "cursor_left":
-        config['path'] = "input/key"
-        config['body'] = {"key":"CursorLeft"}
-        post(config)
-
-    elif args.command == "cursor_right":
-        config['path'] = "input/key"
-        config['body'] = {"key":"CursorRight"}
-        post(config)
-
-    elif args.command == "confirm":
-        config['path'] = "input/key"
-        config['body'] = {"key":"Confirm"}
-        post(config)
-
-    # a general POST request
+    # a general GET request for custom commands
+    elif args.command == "get":
+        if args.path:
+            config['path'] = args.path
+            get(config)
+        else:
+            print("For general GET requests --path is required") 
+            
+    # a general POST request for custom commands
     elif args.command == "post":
         if args.body and args.path:
             config['path'] = args.path
@@ -390,13 +502,8 @@ def main():
         else:
             print("For general POST requests --path and --body are required") 
 
-    # a general GET request
-    elif args.command == "get":
-        if args.path:
-            config['path'] = args.path
-            get(config)
-        else:
-            print("For general GET requests --path is required") 
-
+    else:
+        print("Unknown command", args.command)
+        
 if __name__ == '__main__':
     main()
