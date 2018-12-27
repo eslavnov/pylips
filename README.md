@@ -5,6 +5,8 @@ There are some similar modules available, but they lack documentation, miss some
 
 **It is also the only module that allows toggling 'Ambilight + Hue' setting.**
 
+The current version of the API does not allow switching input sources anymore (?), use [this tool](https://github.com/eslavnov/android-tv-remote) instead.
+
 ## Table of contents ##
 1. [Prerequisites](#prerequisites)
 1. [Pairing with the TV](#pairing-with-the-tv)
