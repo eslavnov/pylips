@@ -170,6 +170,9 @@ def main():
     available_commands_get={
         "list_channels": {
             "path": "channeldb/tv/channelLists/all"
+        },
+        "powerstate": {
+            "path": "powerstate"
         }
     }
 
