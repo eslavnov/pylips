@@ -46,6 +46,7 @@ python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --
 ```
 
 **Available built-in commands:**
+1. `powerstate` - Returns the current power state of the TV (`On` or `Off`)
 1. `ambilight_on` - Turns ambilight on
 1. `ambilight_off` - Turns ambilight off
 1. `ambihue_status` - Gets status of 'Ambilight + Hue'
