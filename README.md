@@ -39,7 +39,7 @@ The TV will display a 4-digit pin-code that you need to input to get a username 
 
 **Security note:**
 
-To pair with the TV we need to create a HMAC signature using an 88-character (?) key. As far as I can tell the key is used for pairing only. With that in mind and to make this tool as user-friendly as possible, the key is hardcoded. I see no security issues with this but if you are extremely paranoid you can change it: look for a secret_key in the beginning of the code.
+To pair with the TV we need to create a HMAC signature using an 88-character (?) key. As far as I can tell the key is used for pairing only. With that in mind and to make this tool as user-friendly as possible, the key is hardcoded. I see no security issues with this but if you are extremely paranoid you can change it: look for a `secret_key` in the beginning of the code.
 
 ## Controlling the TV ##
 You can take advantage of some of the built-in commands (to be extended) or send your own custom commands.
