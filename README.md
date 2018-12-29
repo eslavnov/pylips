@@ -37,6 +37,10 @@ The TV will display a 4-digit pin-code that you need to input to get a username 
 
 **Write down the username and password since they are required for all future calls!**
 
+**Security note:**
+
+To pair with the TV we need to create a HMAC signature using an 88-character (?) key. As far as I can tell the key is used for pairing only. With that in mind and to make this tool as user-friendly as possible, the key is hardcoded. I see no security issues with this but if you are extremely paranoid you can change it: look for a secret_key in the beginning of the code.
+
 ## Controlling the TV ##
 You can take advantage of some of the built-in commands (to be extended) or send your own custom commands.
 
@@ -46,10 +50,10 @@ python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --
 ```
 
 **Available built-in commands:**
-1. `powerstate` - Returns the current power state of the TV (`On` or `Off`)
+1. `powerstate` - Returns the current power state of the TV ('On' or 'Off')
 1. `ambilight_on` - Turns ambilight on
 1. `ambilight_off` - Turns ambilight off
-1. `ambihue_status` - Gets status of 'Ambilight + Hue'
+1. `ambihue_status` - Returns the current status of 'Ambilight + Hue'
 1. `ambihue_on` - Turns 'Ambilight + Hue' on
 1. `ambihue_off` - Turns 'Ambilight + Hue' off
 1. `ambilight_video_immersive` - Sets Ambilight to 'Follow video' (Immersive)
@@ -106,8 +110,7 @@ python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --
 The tools exposes two general commands to talk to the TV's API: `get` (sends GET request and *gets* back some data like ambilight mode) and `post` (sends POST request that *posts* some data and changes something in the TV - like turning the ambilight off).
 
 Read the API reference first to understand available endpoints and how to use them. There are some unexpected things like:
-* Pairing process returns objects like '{"error_id":"SUCCESS"}'
-* POST requests that do not mutate anything and generally behave like GET requests (why, Philips?!)
+* Pairing process returns objects like '{"error_id":"SUCCESS"}' (why, Philips?!)
 * Using strings like 'On'/'Off' for boolean variables (really, Philips?!)
 * API returns 'Nodeid' for some GET requests, while expecting 'nodeid' for POST requests (come on, Philips has to do it all on purpose, right? Right?)
 
