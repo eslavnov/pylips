@@ -1,3 +1,4 @@
+# version 0.2
 import requests
 import json
 import random
@@ -482,6 +483,180 @@ def main():
             "path": "input/key",
             "body": {
                 "key": "Confirm"
+            }
+        },
+        "back": {
+            "path": "input/key",
+            "body": {
+                "key": "Back"
+            }
+        },
+        "find": {
+            "path": "input/key",
+            "body": {
+                "key": "Find"
+            }
+        },
+        "red": {
+            "path": "input/key",
+            "body": {
+                "key": "RedColour"
+            }
+        },
+        "green": {
+            "path": "input/key",
+            "body": {
+                "key": "GreenColour"
+            }
+        },
+        "yellow": {
+            "path": "input/key",
+            "body": {
+                "key": "YellowColour"
+            }
+        },
+        "blue": {
+            "path": "input/key",
+            "body": {
+                "key": "BlueColour"
+            }
+        },
+        "home": {
+            "path": "input/key",
+            "body": {
+                "key": "Home"
+            }
+        },
+        "options": {
+            "path": "input/key",
+            "body": {
+                "key": "Options"
+            }
+        },
+        "dot": {
+            "path": "input/key",
+            "body": {
+                "key": "Dot"
+            }
+        },
+        "digit_0": {
+            "path": "input/key",
+            "body": {
+                "key": "Digit0"
+            }
+        },
+        "digit_1": {
+            "path": "input/key",
+            "body": {
+                "key": "Digit1"
+            }
+        },
+        "digit_2": {
+            "path": "input/key",
+            "body": {
+                "key": "Digit2"
+            }
+        },
+        "digit_3": {
+            "path": "input/key",
+            "body": {
+                "key": "Digit3"
+            }
+        },
+        "digit_4": {
+            "path": "input/key",
+            "body": {
+                "key": "Digit4"
+            }
+        },
+        "digit_5": {
+            "path": "input/key",
+            "body": {
+                "key": "Digit5"
+            }
+        },
+        "digit_6": {
+            "path": "input/key",
+            "body": {
+                "key": "Digit6"
+            }
+        },
+        "digit_7": {
+            "path": "input/key",
+            "body": {
+                "key": "Digit7"
+            }
+        },
+        "digit_8": {
+            "path": "input/key",
+            "body": {
+                "key": "Digit8"
+            }
+        },
+        "digit_9": {
+            "path": "input/key",
+            "body": {
+                "key": "Digit9"
+            }
+        },
+        "info": {
+            "path": "input/key",
+            "body": {
+                "key": "Info"
+            }
+        },
+        "adjust": {
+            "path": "input/key",
+            "body": {
+                "key": "Adjust"
+            }
+        },
+        "watch_tv": {
+            "path": "input/key",
+            "body": {
+                "key": "WatchTV"
+            }
+        },
+        "viewmode": {
+            "path": "input/key",
+            "body": {
+                "key": "Viewmode"
+            }
+        },
+        "teletext": {
+            "path": "input/key",
+            "body": {
+                "key": "Teletext"
+            }
+        },
+        "subtitle": {
+            "path": "input/key",
+            "body": {
+                "key": "Subtitle"
+            }
+        },
+        "source": {
+            "path": "input/key",
+            "body": {
+                "key": "Source"
+            }
+        },
+        "ambilight_onoff": {
+            "path": "input/key",
+            "body": {
+                "key": "AmbilightOnOff"
+            }
+        },
+        "record": {
+            "path": "input/key",
+            "body": {
+                "key": "Record"
+            }
+        },
+        "online": {
+            "path": "input/key",
+            "body": {
+                "key": "Online"
             }
         }
     }

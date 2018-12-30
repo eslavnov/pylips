@@ -50,7 +50,64 @@ python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --
 ```
 
 **Available built-in commands:**
+
+&nbsp; &nbsp; &nbsp; &nbsp; **TV power:**
 1. `powerstate` - Returns the current power state of the TV ('On' or 'Off')
+
+   **TV remote keys:**
+1. `standby` - Sends Standby key
+1. `mute` - Sends Mute key
+1. `volume_up` - Sends VolumeUp key
+1. `volume_down` - Sends VolumeDown key
+1. `channel_up` - Sends ChannelStepUp key
+1. `channel_down` - Sends ChannelStepDown key
+1. `play` - Sends Play key
+1. `pause` - Sends Pause key
+1. `play_pause` - Sends PlayPause key
+1. `stop` - Sends Stop key
+1. `fast_forward` - Sends FastForward key
+1. `rewind` - Sends Rewind key
+1. `next` - Sends Next key
+1. `previous` - Sends Previous key
+1. `cursor_up` - Sends CursorUp key
+1. `cursor_down` - Sends CursorDown key
+1. `cursor_left` - Sends CursorLeft key
+1. `cursor_right` - Sends CursorRight key
+1. `confirm` - Sends Confirm key
+1. `back` - Sends Back key
+1. `home` - Sends Home key
+1. `options` - Sends Options key
+1. `info` - Sends Info key
+1. `find` - Sends Find key
+1. `adjust` - Sends Adjust key
+1. `watch_tv` - Sends WatchTV key
+1. `viewmode` - Sends Viewmode key
+1. `teletext` - Sends Teletext key
+1. `subtitle` - Sends Subtitle key
+1. `record` - Sends Record key
+1. `online` - Sends Online key
+1. `source` - Sends Source key
+1. `ambilight_onoff` - Sends AmbilightOnOff key
+1. `red` - Sends RedColour key
+1. `green` - Sends GreenColour key
+1. `yellow` - Sends YellowColour key
+1. `blue` - Sends BlueColour key
+1. `dot` - Sends Dot key
+1. `digit_0` - Sends Digit0 key
+1. `digit_1` - Sends Digit1 key
+1. `digit_2` - Sends Digit2 key
+1. `digit_3` - Sends Digit3 key
+1. `digit_4` - Sends Digit4 key
+1. `digit_5` - Sends Digit5 key
+1. `digit_6` - Sends Digit6 key
+1. `digit_7` - Sends Digit7 key
+1. `digit_8` - Sends Digit8 key
+1. `digit_9` - Sends Digit9 key
+
+   **TV channels:**
+1. `list_channels` - Shows channels
+
+   **Ambilight:**
 1. `ambilight_on` - Turns ambilight on
 1. `ambilight_off` - Turns ambilight off
 1. `ambihue_status` - Returns the current status of 'Ambilight + Hue'
@@ -73,26 +130,6 @@ python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --
 1. `ambilight_audio_strobo` - Sets Ambilight to 'Follow audio' (Stroboscope)
 1. `ambilight_audio_party` - Sets Ambilight to 'Follow audio' (Party)
 1. `ambilight_audio_random` - Sets Ambilight to 'Follow audio' (Random Mode)
-1. `list_channels` - Shows channels
-1. `standby` - Sends Standby key
-1. `mute` - Sends Mute key
-1. `volume_up` - Sends VolumeUp key
-1. `volume_down` - Sends VolumeDown key
-1. `channel_up` - Sends ChannelStepUp key
-1. `channel_down` - Sends ChannelStepDown key
-1. `play` - Sends Play key
-1. `pause` - Sends Pause key
-1. `play_pause` - Sends PlayPause key
-1. `stop` - Sends Stop key
-1. `fast_forward` - Sends FastForward key
-1. `rewind` - Sends Rewind key
-1. `next` - Sends Next key
-1. `previous` - Sends Previous key
-1. `cursor_up` - Sends CursorUp key
-1. `cursor_down` - Sends CursorDown key
-1. `cursor_left` - Sends CursorLeft key
-1. `cursor_right` - Sends CursorRight key
-1. `confirm` - Sends Confirm key
 
 **Examples of using the built-in commands:**
 
@@ -140,6 +177,16 @@ Since no official API documentation is available, I've decided to collect and do
 All endpoints in API reference are tested and fully working unless explicitly marked otherwise. Some channel endpoints are missing since I can not test them until January 2019. Any comments, new endpoints and fixes to the API reference are incredibly welcome.
 
 [The API reference (work in progress)](https://github.com/eslavnov/Pylips/wiki).
+
+## Change log ##
+
+### 0.2 - 2018-12-30
+**Added**
+- All TV remote key commands are now built-in
+- Add change log to README
+
+### 0.1 - 2018-12-26
+Initial release
 
 ## TO-DO
 1. Finish documenting and testing all available API endpoints (January 2019)
