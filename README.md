@@ -14,8 +14,9 @@ The current version of the API does not allow switching input sources anymore (?
     1. [Built-in commands](#built-in-commands)
     1. [Custom commands](#custom-commands)
 1. [API reference](#api-reference)
+1. [Change log](#change-log)
 1. [TO-DO](#to-do)
-1. [Acknowledgements](#Acknowledgements)
+1. [Acknowledgements](#acknowledgements)
 1. [Contact details](#contact-details)
 
 ## Prerequisites
@@ -178,7 +179,7 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 [The API reference (work in progress)](https://github.com/eslavnov/Pylips/wiki).
 
-## Change log ##
+## Change log
 
 ### 0.2 - 2018-12-30
 **Added**
