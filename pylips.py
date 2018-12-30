@@ -1,4 +1,4 @@
-# version 0.2
+# version 0.3
 import requests
 import json
 import random
@@ -34,9 +34,9 @@ def getDeviceSpecJson(config):
     return device_spec
 
 # pairs with a TV
-def pair_request(config, data, errCount=0):
-    if errCount < 10:
-        if errCount > 0:
+def pair_request(config, data, count_err=0):
+    if count_err < 10:
+        if count_err > 0:
             print("resending pair request")
         response={}
         try:
@@ -50,8 +50,8 @@ def pair_request(config, data, errCount=0):
                 return print('Can not reach the API')
         except Exception:
             # try again
-            errCount += 1
-            return pair_request(config, data, errCount)
+            count_err += 1
+            return pair_request(config, data, count_err)
 
         auth_Timestamp = response["timestamp"]
         config['auth_key'] = response["auth_key"]
@@ -75,9 +75,9 @@ def pair_request(config, data, errCount=0):
         return 
 
 # confirms pairing with a TV
-def pair_confirm(config, data, errCount=0):
-    if errCount < 10:
-        if errCount > 0:
+def pair_confirm(config, data, count_err=0):
+    if count_err < 10:
+        if count_err > 0:
             print("Resending pair confirm request")
         try:
             requests.post("https://" + config['address'] +":1926/6/pair/grant", json=data, verify=False, auth=HTTPDigestAuth(config['device_id'], config['auth_key']),timeout=2)
@@ -86,13 +86,13 @@ def pair_confirm(config, data, errCount=0):
             print("Use these credentials with --user and --pass parameters")
         except Exception:
             # try again
-            errCount += 1
-            pair_confirm(config, data, errCount)
+            count_err += 1
+            pair_confirm(config, data, count_err)
     else:
         print("The API is unreachable. Try restarting your TV and pairing again")
 
 # initiates pairing with a TV
-def pair(config, errCount=0):
+def pair(config, count_err=0):
     config['application_id'] = "app.id"
     config['device_id'] = createDeviceId()
     data = { 'scope' :  [ "read", "write", "control"] }
@@ -101,15 +101,15 @@ def pair(config, errCount=0):
     pair_request(config,data)
     
 # a general GET request
-def get(config, errCount=0):
-    if errCount < 10:
+def get(config, count_err=0):
+    if count_err < 10:
         try:
-            print("Sending GET request")
-            r = requests.get("https://" + config['address'] + ":1926/6/" + config['path'], verify=False,auth=HTTPDigestAuth(config['device_id'], config['auth_key']), timeout=2)
+            print("Sending GET request to", config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'])
+            r = requests.get(config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'], verify=False, auth=config['auth'], timeout=2)
         except Exception:
             # try again
-            errCount += 1
-            return get(config, errCount)
+            count_err += 1
+            return get(config, count_err)
         if len(r.text) > 0:
             print(r.text)
         print("Request sent!")
@@ -117,21 +117,24 @@ def get(config, errCount=0):
         print("Can not reach the API")
 
 # a general POST request
-def post(config, errCount=0):
-    if errCount < 10:
+def post(config, count_err=0):
+    if count_err < 10:
         try:
-            print("Sending POST request")
-            r = requests.post("https://" + config['address'] + ":1926/" + config['path'], json=config['body'], verify=False,auth=HTTPDigestAuth(config['device_id'], config['auth_key']), timeout=2)
+            print("Sending POST request to", config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'])
+            r = requests.post(config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'], json=config['body'], verify=False, auth=config['auth'], timeout=2)
         except Exception:
             # try again
-            errCount += 1
-            return post(config, errCount)
+            count_err += 1
+            return post(config, count_err)
         if len(r.text) > 0:
             print(r.text)
         print("Request sent!")
+    else:
+        print("Can not reach the API")
 
 def main():
     config={}
+    config["api_version"] = "6"
     parser = argparse.ArgumentParser(description='Control Philips TV API (version 6)')
     parser.add_argument("--host", dest='host', help="TV's ip address")
     parser.add_argument("--user", dest='user', help="Username")
@@ -157,16 +160,23 @@ def main():
                 pair(config)
                 return
             elif choice in no:
-                return print ("Please provide username and password (--user and --pass)")
+                return print ("If you have an Android TV, please provide both a username and a password (--user and --pass)")
             else:
                 sys.stdout.write("Please respond with 'yes' or 'no' \n")
 
-    if args.user is None or args.password is None:
-        return print("Please provide username and password (--user and --pass) or run --pair to get them")
-
-    config['device_id'] = args.user
-    config['auth_key'] = args.password
-
+    if args.user and args.password:
+        config['device_id'] = args.user
+        config['auth_key'] = args.password
+        config['api_port'] = "1926"
+        config['api_protocol'] = "https://"
+        config['auth'] = HTTPDigestAuth(config['device_id'], config['auth_key'])
+    elif args.user is None and args.password is None:
+        config['api_port'] = "1925"
+        config['api_protocol'] = "http://"
+        config['auth'] = None
+    else:
+        return print ("If you have an Android TV, please provide both a username and a password (--user and --pass)")
+ 
     # Built-in GET commands (basically wrappers around common API calls)
     available_commands_get={
         "list_channels": {

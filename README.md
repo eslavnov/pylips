@@ -1,15 +1,15 @@
 # Pylips
-Pylips is a Python tool to control Philips Android TVs (2016+) through their reverse-engineered API.
+Pylips is a Python tool to control Philips TVs (2016+) through their reverse-engineered API.
 
-There are some similar modules available, but they lack documentation, miss some API methods and sometimes have outdated code. This module is the most complete one in terms of both functionality and documentation. 
+There are some similar modules available, but they lack documentation, miss some API methods and sometimes have outdated code. This module is the most complete one in terms of both functionality and documentation. It supports both Android and non-Android Philips TVs.
 
 **It is also the only module that allows toggling 'Ambilight + Hue' setting.**
 
-The current version of the API does not allow switching input sources anymore (?), use [this tool](https://github.com/eslavnov/android-tv-remote) instead.
+The current version of the API does not allow switching input sources anymore (?), use [this tool](https://github.com/eslavnov/android-tv-remote) instead (Android TVs only).
 
 ## Table of contents ##
 1. [Prerequisites](#prerequisites)
-1. [Pairing with the TV](#pairing-with-the-tv)
+1. [Pairing with the TV (Android TVs only)](#pairing-with-the-tv-android-tvs-only)
 1. [Controlling the TV](#controlling-the-tv)
     1. [Built-in commands](#built-in-commands)
     1. [Custom commands](#custom-commands)
@@ -27,9 +27,15 @@ Provided that you have python (version 3+) on your system, install all the depen
 pip install -r requirements.txt
 ```
 
-## Pairing with the TV
+You may have to use `pip3` and `python3` instead of `pip` and `python` depending on how these tools are installed on your system.
 
-To use this tool with your Philips TV you will need a username and a password, which you can get by running the tool with a `-- host` parameter (your TV's ip address):
+**If your TV has Android, you have to pair with the TV first to get a username/password which you will need to provide with `--user` and `--pass` parameters for all future calls.**
+
+**If your TV does not have Android, you do NOT need to pair with the TV. You should also NEVER use `--user` and `--pass` parameters - they are required for Android TVs only.**
+
+## Pairing with the TV (Android TVs only)
+
+To use this tool with your Philips Android TV you will need a username and a password, which you can get by running the tool with a `-- host` parameter (your TV's ip address):
 
 ```
 python pylips.py --host 192.168.201.10
@@ -49,6 +55,8 @@ You can take advantage of some of the built-in commands (to be extended) or send
 ```
 python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command %command%
 ```
+
+Skip the `--user` and `--pass` parameters if your TV does not have Android.
 
 **Available built-in commands:**
 
@@ -180,6 +188,10 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 [The API reference (work in progress)](https://github.com/eslavnov/Pylips/wiki).
 
 ## Change log
+
+### 0.3 - 2018-12-31
+**Added**
+- Non-Android Philips TVs are now also supported
 
 ### 0.2 - 2018-12-30
 **Added**
