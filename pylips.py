@@ -40,7 +40,7 @@ def pair_request(config, data, count_err=0):
             print("resending pair request")
         response={}
         try:
-            r = requests.post("https://" + "172.168.201.11" + ":1926/6/pair/request", json=data, verify=False, timeout=2)
+            r = requests.post("https://" + config['address'] + ":1926/6/pair/request", json=data, verify=False, timeout=2)
             if r.json() is not None:
                 if r.json()['error_id'] == 'SUCCESS':
                     response=r.json()
