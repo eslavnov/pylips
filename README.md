@@ -51,6 +51,8 @@ To pair with the TV we need to create a HMAC signature using an 88-character (?)
 ## Controlling the TV ##
 You can take advantage of some of the built-in commands (to be extended) or send your own custom commands.
 
+Add `--verbose 0` to any command if you don't want to see the feedback in your terminal (useful for command line sensors).
+
 ### Built-in commands ###
 ```
 python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command %command%
@@ -114,7 +116,10 @@ Skip the `--user` and `--pass` parameters if your TV does not have Android.
 1. `digit_9` - Sends Digit9 key
 
    **TV channels:**
-1. `list_channels` - Shows channels
+1. `current_channel` - Returns current channel (if in TV mode)
+1. `set_channel` - Turns a specified channel on. Requires a valid `--body` argument, see [API reference](https://github.com/eslavnov/pylips/wiki/Activities-TV-(GET)/) to get it.
+1. `list_channels` - Returns channel list
+1. `list_favorite` - Returns favorite list
 
    **Ambilight:**
 1. `ambilight_on` - Turns ambilight on
@@ -140,6 +145,9 @@ Skip the `--user` and `--pass` parameters if your TV does not have Android.
 1. `ambilight_audio_party` - Sets Ambilight to 'Follow audio' (Party)
 1. `ambilight_audio_random` - Sets Ambilight to 'Follow audio' (Random Mode)
 
+   **Other:**
+1. `launch_app` - Launches an app (Android TVs only). Requires a valid `--body` argument, see [API reference](https://github.com/eslavnov/pylips/wiki/Activities-current-(GET)) to get it.
+
 **Examples of using the built-in commands:**
 
 Send Stop key:
@@ -150,6 +158,11 @@ python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --
 Turn Ambilight on:
 ```
 python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command ambilight_on
+```
+
+Launch YouTube:
+```
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command launch_app --body '{"id":"com.google.android.apps.youtube.tv.activity.ShellActivity-com.google.android.youtube.tv","order":0,"intent":{"action":"Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 pkg=com.google.android.youtube.tv cmp=com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.ShellActivity }","component":{"packageName":"com.google.android.youtube.tv","className":"com.google.android.apps.youtube.tv.activity.ShellActivity"}},"label":"YouTube"}'
 ```
 
 ### Custom commands ###
@@ -188,6 +201,12 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 [The API reference (work in progress)](https://github.com/eslavnov/Pylips/wiki).
 
 ## Change log
+
+
+### 0.4 - 2019-01-28
+**Added**
+- Expand built-in commands (set/get TV channel and launch apps)
+- Add `--verbose` option
 
 ### 0.3 - 2018-12-31
 **Added**
