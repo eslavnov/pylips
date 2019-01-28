@@ -1,4 +1,4 @@
-# version 0.3
+# version 0.4
 import requests
 import json
 import random
@@ -101,36 +101,42 @@ def pair(config, count_err=0):
     pair_request(config,data)
     
 # a general GET request
-def get(config, count_err=0):
+def get(config, verbose=1, count_err=0):
     if count_err < 10:
         try:
-            print("Sending GET request to", config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'])
+            if verbose == 1:
+                print("Sending GET request to", config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'])
             r = requests.get(config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'], verify=False, auth=config['auth'], timeout=2)
         except Exception:
             # try again
             count_err += 1
-            return get(config, count_err)
+            return get(config, verbose, count_err)
         if len(r.text) > 0:
             print(r.text)
-        print("Request sent!")
+        if verbose == 1:
+            print("Request sent!")
     else:
-        print("Can not reach the API")
+        print({"error":"Can not reach the API"})
 
 # a general POST request
-def post(config, count_err=0):
+def post(config, verbose=1, count_err=0):
     if count_err < 10:
         try:
-            print("Sending POST request to", config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'])
+            if verbose == 1:
+                print("Sending POST request to", config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'])
             r = requests.post(config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'], json=config['body'], verify=False, auth=config['auth'], timeout=2)
         except Exception:
             # try again
             count_err += 1
-            return post(config, count_err)
+            return post(config, verbose, count_err)
+        if verbose == 1:
+            print("Request sent")
         if len(r.text) > 0:
             print(r.text)
-        print("Request sent!")
+        else:
+            print({"response":"OK"})
     else:
-        print("Can not reach the API")
+        print({"error":"Can not reach the API"})
 
 def main():
     config={}
@@ -142,13 +148,16 @@ def main():
     parser.add_argument("--command", help="Command to run", default="pair")
     parser.add_argument("--path", dest='path', help="API's endpoint path")
     parser.add_argument("--body", dest='body', help="Body for post requests")
-
+    parser.add_argument("--verbose", dest='verbose', help="Display feedback", default=1)
     args = parser.parse_args()
 
     if args.host is None:
         return print("Please set your TV's IP-address with a --host parameter")
 
     config['address'] = args.host
+
+    if args.body is not None:
+        config["body"] = json.loads(args.body)
  
     if args.command == "pair":
         choice=""
@@ -179,14 +188,35 @@ def main():
  
     # Built-in GET commands (basically wrappers around common API calls)
     available_commands_get={
+        "current_channel": {
+            "path": "activities/tv"
+        },
         "list_channels": {
             "path": "channeldb/tv/channelLists/all"
+        },
+        "list_favorite": {
+            "path": "channeldb/tv/favoritelLists/all"
         },
         "powerstate": {
             "path": "powerstate"
         }
     }
+    
+    # Built-in POST commands (user-specified body)
+    if "body" in config:
+        available_commands_post_custom ={
+            "launch_app": {
+                "path": "activities/launch",
+                "body": config["body"],
+                },
+            "set_channel": {
+                "path": "activities/tv",
+                "body": config["body"],
+                },
 
+        }
+    else:
+        available_commands_post_custom={}
     # Built-in POST commands (basically wrappers around common API calls)
     available_commands_post ={
         "ambilight_on": {
@@ -674,17 +704,22 @@ def main():
     if args.command in available_commands_post:
         config['path'] = available_commands_post[args.command]['path']
         config['body'] = available_commands_post[args.command]['body']
-        post(config)
+        return post(config, int(args.verbose))
 
-    elif args.command in available_commands_get:
+    if args.command in available_commands_post_custom:
+        config['path'] = available_commands_post_custom[args.command]['path']
+        config['body'] = available_commands_post_custom[args.command]['body']
+        return post(config, int(args.verbose))
+
+    if args.command in available_commands_get:
         config['path'] = available_commands_get[args.command]['path']
-        get(config)
+        return get(config,int(args.verbose))
 
     # a general GET request for custom commands
     elif args.command == "get":
         if args.path:
             config['path'] = args.path
-            get(config)
+            return get(config, int(args.verbose))
         else:
             print("For general GET requests --path is required") 
             
@@ -693,7 +728,7 @@ def main():
         if args.body and args.path:
             config['path'] = args.path
             config['body'] = json.loads(args.body)
-            post(config)
+            return post(config, int(args.verbose))
         else:
             print("For general POST requests --path and --body are required") 
 
