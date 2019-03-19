@@ -146,7 +146,7 @@ Skip the `--user` and `--pass` parameters if your TV does not have Android.
 1. `ambilight_audio_random` - Sets Ambilight to 'Follow audio' (Random Mode)
 
    **Other:**
-1. `launch_app` - Launches an app (Android TVs only). Requires a valid `--body` argument, see [API reference](https://github.com/eslavnov/pylips/wiki/Activities-current-(GET)) to get it.
+1. `launch_app` - Launches an app (Android TVs only). Requires a valid `--body` argument. See [API reference](https://github.com/eslavnov/pylips/wiki/Applications-(GET)) to get a list of installed apps, find your app in this list and use it as a `--body` argument.
 
 **Examples of using the built-in commands:**
 
@@ -163,6 +163,11 @@ python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --
 Launch YouTube:
 ```
 python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command launch_app --body '{"id":"com.google.android.apps.youtube.tv.activity.ShellActivity-com.google.android.youtube.tv","order":0,"intent":{"action":"Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 pkg=com.google.android.youtube.tv cmp=com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.ShellActivity }","component":{"packageName":"com.google.android.youtube.tv","className":"com.google.android.apps.youtube.tv.activity.ShellActivity"}},"label":"YouTube"}'
+```
+
+Launch Netflix:
+```
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command launch_app --body '{"label":"Netflix","intent":{"component":{"packageName":"com.netflix.ninja","className":"com.netflix.ninja.MainActivity"},"action":"Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 pkg=com.netflix.ninja cmp=com.netflix.ninja/.MainActivity }"},"order":0,"id":"com.netflix.ninja.MainActivity-com.netflix.ninja","type":"app"}'
 ```
 
 ### Custom commands ###
