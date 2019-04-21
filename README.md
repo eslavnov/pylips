@@ -11,7 +11,9 @@ The current version of the API does not allow switching input sources anymore (?
 
 ## Table of contents ##
 1. [Prerequisites](#prerequisites)
-1. [Pairing with the TV (Android TVs only)](#pairing-with-the-tv-android-tvs-only)
+1. [Setting up Pylips](#setting-up-pylips)
+    1. [New users](#new-users)
+    1. [Migrating from older versions](#migrating-from-older-versions)
 1. [Controlling the TV (manual mode)](#controlling-the-tv-manual-mode)
     1. [Built-in commands](#built-in-commands)
     1. [Custom commands](#custom-commands)
@@ -56,7 +58,7 @@ host =                  # your MQTT broker's ip address
 port =                  # your MQTT broker's port
 user =                  # your MQTT username
 pass =                  # your MQTT password
-TLS = False             # your MQTT password         
+TLS = False             # use TLS        
 topic_pylips =          # Pylips will listen for commands to this topic
 topic_status =          # Pylips will send status updates to this topic
 ```
@@ -318,7 +320,7 @@ Initial release
 
 ~7. Home assistant integration~ CANCELLED: not needed since you can now integrate it with MQTT sensors/switches.
 
-At this point I consider the tool to be completed. No new functionality is planned, but I will fix any reported bugs and add any missing API endpoints/commands. Open an issue with your problem/suggestions.
+At this point I consider the tool to be completed. No new functionality is planned, but I will fix any reported bugs and add any missing API endpoints/commands. [Open an issue](https://github.com/eslavnov/pylips/issues) with your problem/suggestions.
 
 ## Acknowledgements
 1. TV pairing mechanism as well as the inspiration for this tool come from [@suborb](https://github.com/suborb)'s brilliant [repo](https://github.com/suborb/philips_android_tv).
