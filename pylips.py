@@ -49,17 +49,14 @@ class Pylips:
                 self.config["DEFAULT"]["verbose"]="True"
             else:
                 self.config["DEFAULT"]["verbose"]="False"
-            if args.host is not None:
+            if args.host:
                 self.config["TV"]["host"] = args.host
             if args.user and args.password:
                 self.config["TV"]["user"] = args.user
                 self.config["TV"]["pass"] = args.password
                 self.config["TV"]["port"] = "1926"
                 self.config["TV"]["protocol"] = "https://"
-            elif args.user is None and args.password is None:
-                self.config["TV"]["port"] = "1925"
-                self.config["TV"]["protocol"] = "http://"
-            else:
+            elif len(self.config["TV"]["user"])==0 or len(self.config["TV"]["pass"])==0:
                 return print ("If you have an Android TV, please provide both a username and a password (--user and --pass)")
             if len(args.apiv) != 0:
                 self.config["TV"]["apiv"]=args.apiv
@@ -88,11 +85,11 @@ class Pylips:
             self.available_commands = json.load(json_file)
 
         # start MQTT listener and updater if required
-        if len(sys.argv)==1 and self.config["DEFAULT"]["MQTT_listen"] == "True":
+        if len(sys.argv)==1 and self.config["DEFAULT"]["mqtt_listen"] == "True":
                 if len(self.config["MQTT"]["host"])>0:
                     # listen for MQTT messages to run commands
                     self.start_mqtt_listener()
-                    if self.config["DEFAULT"]["MQTT_update"] == "True":
+                    if self.config["DEFAULT"]["mqtt_update"] == "True":
                         # Update TV status and publish any changes
                         self.last_status = {"power_on":False, "volume":None, "muted":False, "cur_app":"NA", "ambilight":None, "ambihue":False}
                         self.start_mqtt_updater(self.verbose)
@@ -111,7 +108,7 @@ class Pylips:
             else:
                 print("Please provide a valid command with a '--command' argument")
         else:
-            print("Please enable MQTT_listen in settings.ini or provide a valid command with a '--command' argument")
+            print("Please enable mqtt_listen in settings.ini or provide a valid command with a '--command' argument")
 
     def is_online(self, host):
         """
@@ -151,8 +148,8 @@ class Pylips:
         return False
 
     # returns True if already paired or using non-Android TVs.
-    def check_paired(self):
-        if int(self.config["TV"]["apiv"])>5 and (len(self.config["TV"]["user"])==0 or len(self.config["TV"]["pass"])==0):
+    def check_if_paired(self):
+        if str(self.config["TV"]["protocol"])=="https://" and (len(str(self.config["TV"]["user"]))==0 or len(str(self.config["TV"]["pass"]))==0):
             return False
         else:
             return True
@@ -187,7 +184,7 @@ class Pylips:
     # pairs with a TV
     def pair_request(self, data, err_count=0):
         response={}
-        r = requests.post("https://" + str(self.config["TV"]["host"]) + ":1926/"+str(config["TV"]["apiv"])+"/pair/request", json=data, verify=False, timeout=2)
+        r = requests.post("https://" + str(self.config["TV"]["host"]) + ":1926/"+str(self.config["TV"]["apiv"])+"/pair/request", json=data, verify=False, timeout=2)
         if r.json() is not None:
             if r.json()["error_id"] == "SUCCESS":
                 response=r.json()
@@ -204,7 +201,7 @@ class Pylips:
         auth = { "auth_AppId" : "1"}
         auth["pin"] = str(pin)
         auth["auth_timestamp"] = auth_Timestamp
-        auth["auth_signature"] = create_signature(b64decode(secret_key), str(auth_Timestamp).encode() + str(pin).encode())
+        auth["auth_signature"] = self.create_signature(b64decode(secret_key), str(auth_Timestamp).encode() + str(pin).encode())
 
         grant_request = {}
         grant_request["auth"] = auth
@@ -221,7 +218,7 @@ class Pylips:
             if err_count > 0:
                 print("Resending pair confirm request")
             try:
-                requests.post("https://" + str(self.config["TV"]["host"]) +":1926/"+str(config["TV"]["apiv"])+"/pair/grant", json=data, verify=False, auth=HTTPDigestAuth(self.config["TV"]["user"], self.config["TV"]["pass"]),timeout=2)
+                requests.post("https://" + str(self.config["TV"]["host"]) +":1926/"+str(self.config["TV"]["apiv"])+"/pair/grant", json=data, verify=False, auth=HTTPDigestAuth(self.config["TV"]["user"], self.config["TV"]["pass"]),timeout=2)
                 print("Username for subsequent calls is: " + str(self.config["TV"]["user"]))
                 print("Password for subsequent calls is: " + str(self.config["TV"]["pass"]))
                 return print("The credentials are saved in the settings.ini file.")
@@ -248,7 +245,7 @@ class Pylips:
                 print(r.text)
                 return r.text
         else:
-            if self.config["DEFAULT"]["MQTT_listen"].lower()=="true" and len(sys.argv)==1:
+            if self.config["DEFAULT"]["mqtt_listen"].lower()=="true":
                 self.mqtt_update_status({"power_on":False, "volume":None, "muted":False, "cur_app":"NA", "ambilight":None, "ambihue":False})
             return json.dumps({"error":"Can not reach the API"})
 
@@ -264,7 +261,7 @@ class Pylips:
                 continue
             if verbose:
                 print("Request sent!")
-            if callback and self.config["DEFAULT"]["MQTT_listen"].lower()=="true" and len(sys.argv)==1:
+            if callback and self.config["DEFAULT"]["mqtt_listen"].lower()=="true" and len(sys.argv)==1:
                 # run mqtt callback to update the status (only in MQTT mode)
                 self.mqtt_callback(path)
             if len(r.text) > 0:
@@ -274,7 +271,7 @@ class Pylips:
                 print(json.dumps({"response":"OK"}))
                 return json.dumps({"response":"OK"})
         else:
-            if self.config["DEFAULT"]["MQTT_listen"].lower()=="true" and len(sys.argv)==1:
+            if self.config["DEFAULT"]["mqtt_listen"].lower()=="true":
                 self.mqtt_update_status({"power_on":False, "volume":None, "muted":False, "cur_app":"NA", "ambilight":None, "ambihue":False})
             return json.dumps({"error":"Can not reach the API"})
 
@@ -399,6 +396,7 @@ class Pylips:
                 muted = vol_status["muted"]
                 volume = vol_status["current"]
                 if self.last_status["muted"] != muted or self.last_status["volume"] != volume:
+                    print('ooops')
                     self.mqtt.publish(str(self.config["MQTT"]["topic_pylips"]), json.dumps({"status":{"muted":muted, "volume":volume, "power_on":True}}), retain = False)
 
     # runs MQTT update functions with a specified update interval
