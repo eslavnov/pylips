@@ -1,15 +1,18 @@
-# version 0.4
+# version 1.0.0
+import platform    
+import subprocess
+import configparser
 import requests
 import json
-import random
 import string
+import time
 import argparse
 import sys
-
+import random
 from base64 import b64encode,b64decode
 from Crypto.Hash import SHA, HMAC
 from requests.auth import HTTPDigestAuth
-from datetime import datetime
+import paho.mqtt.client as mqttc
 
 # Suppress "Unverified HTTPS request is being made" error message
 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
@@ -17,723 +20,396 @@ requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.
 # Key used for generated the HMAC signature
 secret_key="JCqdN5AcnAHgJYseUn7ER5k3qgtemfUvMRghQpTfTZq7Cvv8EPQPqfz6dDxPQPSu4gKFPWkJGw32zyASgJkHwCjU"
 
-# creates random device id
-def createDeviceId():
-    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(16))
+parser = argparse.ArgumentParser(description="Control Philips TV API (versions 5 and 6)")
+parser.add_argument("--host", dest="host", help="TV's ip address")
+parser.add_argument("--user", dest="user", help="Username")
+parser.add_argument("--pass", dest="password", help="Password")
+parser.add_argument("--command", help="Command to run", default="")
+parser.add_argument("--path", dest="path", help="API's endpoint path")
+parser.add_argument("--body", dest="body", help="Body for post requests")
+parser.add_argument("--verbose", dest="verbose", help="Display feedback", default="1")
+parser.add_argument("--apiv", dest="apiv", help="Api version", default="")
+args = parser.parse_args()
 
-# creates signature
-def create_signature(secret_key, to_sign):
-    sign = HMAC.new(secret_key, to_sign, SHA)
-    return str(b64encode(sign.hexdigest().encode()))
-
-# creates device spec JSON
-def getDeviceSpecJson(config):
-    device_spec =  { "device_name" : "heliotrope", "device_os" : "Android", "app_name" : "Pylips", "type" : "native"}
-    device_spec['app_id'] = config['application_id']
-    device_spec['id'] = config['device_id']
-    return device_spec
-
-# pairs with a TV
-def pair_request(config, data, count_err=0):
-    if count_err < 10:
-        if count_err > 0:
-            print("resending pair request")
-        response={}
+class Pylips:
+    def __init__(self, ini_file):
+        # read config file
+        self.config = configparser.ConfigParser()
         try:
-            r = requests.post("https://" + config['address'] + ":1926/6/pair/request", json=data, verify=False, timeout=2)
-            if r.json() is not None:
-                if r.json()['error_id'] == 'SUCCESS':
-                    response=r.json()
-                else:
-                    return print('Error', r.json())
+            self.config.read(ini_file)
+        except:
+            return print("Config file", ini_file, "not found")
+
+        if args.host is None and self.config["TV"]["host"]=="":
+            return print("Please set your TV's IP-address with a --host parameter or in [TV] section in settings.ini")
+            
+        # override config with passed args
+        if len(sys.argv)>1:
+            if args.verbose=="1" or args.verbose.lower()=="true":
+                self.config["DEFAULT"]["verbose"]="True"
             else:
-                return print('Can not reach the API')
-        except Exception:
-            # try again
-            count_err += 1
-            return pair_request(config, data, count_err)
+                self.config["DEFAULT"]["verbose"]="False"
+            if args.host is not None:
+                self.config["TV"]["host"] = args.host
+            if args.user and args.password:
+                self.config["TV"]["user"] = args.user
+                self.config["TV"]["pass"] = args.password
+                self.config["TV"]["port"] = "1926"
+                self.config["TV"]["protocol"] = "https://"
+            elif args.user is None and args.password is None:
+                self.config["TV"]["port"] = "1925"
+                self.config["TV"]["protocol"] = "http://"
+            else:
+                return print ("If you have an Android TV, please provide both a username and a password (--user and --pass)")
+            if len(args.apiv) != 0:
+                self.config["TV"]["apiv"]=args.apiv
+                
+        # check verbose option
+        if self.config["DEFAULT"]["verbose"] == "True":
+            self.verbose = True
+        else:
+            self.verbose = False
+        # check API version
+        if len(self.config["TV"]["apiv"])==0:
+            if self.find_api_version(self.verbose):
+                if self.check_paired() is False:
+                    print("No valid credentials found, starting pairing process...")
+                    self.pair()
+                    with open("settings.ini", "w") as configfile:
+                        self.config.write(configfile)
+            else:
+                if self.is_online(self.config["TV"]["host"]):
+                    return print("IP", self.config["TV"]["host"], "is online, but no known API is found. Exiting...")
+                else:
+                    return print("IP", self.config["TV"]["host"], "seems to be offline. Exiting...")
+
+        # load API commands
+        with open("available_commands.json") as json_file:  
+            self.available_commands = json.load(json_file)
+
+        # start MQTT listener and updater if required
+        if len(sys.argv)==1 and self.config["DEFAULT"]["MQTT_listen"] == "True":
+                if len(self.config["MQTT"]["host"])>0:
+                    # listen for MQTT messages to run commands
+                    self.start_mqtt_listener()
+                    if self.config["DEFAULT"]["MQTT_update"] == "True":
+                        # Update TV status and publish any changes
+                        self.last_status = {"power_on":False, "volume":None, "muted":False, "cur_app":"NA", "ambilight":None, "ambihue":False}
+                        self.start_mqtt_updater(self.verbose)
+                else:
+                    print("Please specify host in MQTT section in settings.ini to use MQTT")
+        elif len(sys.argv)>1:
+            # parse the passed args and run required command
+            body=args.body
+            path=args.path
+            if args.command == "get":
+                self.get(path,self.verbose)
+            elif args.command == "post":
+                self.post(path, body, self.verbose)
+            elif len(args.command)>0:
+                self.run_command(args.command,body, self.verbose)
+            else:
+                print("Please provide a valid command with a '--command' argument")
+        else:
+            print("Please enable MQTT_listen in settings.ini or provide a valid command with a '--command' argument")
+
+    def is_online(self, host):
+        """
+        Returns True if host (str) responds to a ping request.
+        """
+        # Option for the number of packets as a function of
+        param = "-n" if platform.system().lower()=="windows" else "-c"
+
+        # Building the command. Ex: "ping -c 1 google.com"
+        command = ["ping", param, "1", host]
+
+        return subprocess.call(command) == 0
+
+    # finds API version, saves it to settings.ini (["TV"]["apiv"]) and returns True if successful.
+    def find_api_version(self, verbose=True, possible_ports=[1925], possible_api_versions=[6,5,1]):
+        if verbose:
+            print ("Checking API version and port...")
+        protocol="http://"
+        for port in possible_ports:
+            for api_version in possible_api_versions:
+                try:
+                    if verbose:
+                        print("Trying", str(protocol) + str(self.config["TV"]["host"]) + ":" + str(port)+"/" + str(api_version)+"/system")
+                    r = requests.get(str(protocol) + str(self.config["TV"]["host"]) + ":" + str(port)+"/" + str(api_version)+"/system", verify=False, timeout=2)
+                except requests.exceptions.ConnectionError:
+                    print("Connection refused")
+                    continue
+                if r.status_code == 200:
+                    self.config["TV"]["apiv"]= str(r.json()["api_version"]["Major"])
+                    if "featuring" in r.json() and "systemfeatures" in r.json()["featuring"] and "pairing_type" in r.json()["featuring"]["systemfeatures"] and r.json()["featuring"]["systemfeatures"]["pairing_type"] == "digest_auth_pairing":
+                        self.config["TV"]["protocol"] = "https://"
+                        self.config["TV"]["port"] = "1926"
+                    else:
+                        self.config["TV"]["protocol"] = "http://"
+                        self.config["TV"]["port"] = "1925"
+                    return True
+        return False
+
+    # returns True if already paired or using non-Android TVs.
+    def check_paired(self):
+        if int(self.config["TV"]["apiv"])>5 and (len(self.config["TV"]["user"])==0 or len(self.config["TV"]["pass"])==0):
+            return False
+        else:
+            return True
+        
+    # creates random device id
+    def createDeviceId(self):
+        return "".join(random.SystemRandom().choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(16))
+
+    # creates signature
+    def create_signature(self, secret_key, to_sign):
+        sign = HMAC.new(secret_key, to_sign, SHA)
+        return str(b64encode(sign.hexdigest().encode()))
+
+    # creates device spec JSON
+    def getDeviceSpecJson(self, config):
+        device_spec =  { "device_name" : "heliotrope", "device_os" : "Android", "app_name" : "Pylips", "type" : "native"}
+        device_spec["app_id"] = config["application_id"]
+        device_spec["id"] = config["device_id"]
+        return device_spec
+
+    # initiates pairing with a TV
+    def pair(self, err_count=0):
+        payload = {}
+        payload["application_id"] = "app.id"
+        payload["device_id"] = self.createDeviceId()
+        self.config["TV"]["user"] = payload["device_id"]
+        data = { "scope" :  [ "read", "write", "control"] }
+        data["device"]  = self.getDeviceSpecJson(payload)
+        print("Sending pairing request")
+        self.pair_request(data)
+
+    # pairs with a TV
+    def pair_request(self, data, err_count=0):
+        response={}
+        r = requests.post("https://" + str(self.config["TV"]["host"]) + ":1926/"+str(config["TV"]["apiv"])+"/pair/request", json=data, verify=False, timeout=2)
+        if r.json() is not None:
+            if r.json()["error_id"] == "SUCCESS":
+                response=r.json()
+            else:
+                return print("Error", r.json())
+        else:
+            return print("Can not reach the API")
 
         auth_Timestamp = response["timestamp"]
-        config['auth_key'] = response["auth_key"]
-
+        self.config["TV"]["pass"] = response["auth_key"]
+        data["device"]["auth_key"] = response["auth_key"]
         pin = input("Enter onscreen passcode: ")
 
         auth = { "auth_AppId" : "1"}
-        auth['pin'] = str(pin)
-        auth['auth_timestamp'] = auth_Timestamp
-        auth['auth_signature'] = create_signature(b64decode(secret_key), str(auth_Timestamp).encode() + str(pin).encode())
+        auth["pin"] = str(pin)
+        auth["auth_timestamp"] = auth_Timestamp
+        auth["auth_signature"] = create_signature(b64decode(secret_key), str(auth_Timestamp).encode() + str(pin).encode())
 
         grant_request = {}
-        grant_request['auth'] = auth
-        grant_request['device']  = getDeviceSpecJson(config)
+        grant_request["auth"] = auth
+        data["application_id"]="app.id"
+        data["device_id"]=self.config["TV"]["user"]
+        grant_request["device"]  = self.getDeviceSpecJson(data)
 
         print("Attempting to pair")
-        pair_confirm(config,grant_request)
-        
-    else:
-        print("The API is unreachable. Try restarting your TV and pairing again")
-        return 
+        self.pair_confirm(grant_request)
 
-# confirms pairing with a TV
-def pair_confirm(config, data, count_err=0):
-    if count_err < 10:
-        if count_err > 0:
-            print("Resending pair confirm request")
-        try:
-            requests.post("https://" + config['address'] +":1926/6/pair/grant", json=data, verify=False, auth=HTTPDigestAuth(config['device_id'], config['auth_key']),timeout=2)
-            print("Username for subsequent calls is: " + config['device_id'])
-            print("Password for subsequent calls is: " + config['auth_key'])
-            print("Use these credentials with --user and --pass parameters")
-        except Exception:
-            # try again
-            count_err += 1
-            pair_confirm(config, data, count_err)
-    else:
-        print("The API is unreachable. Try restarting your TV and pairing again")
+    # confirms pairing with a TV
+    def pair_confirm(self, data, err_count=0):
+        while err_count < 10:
+            if err_count > 0:
+                print("Resending pair confirm request")
+            try:
+                requests.post("https://" + str(self.config["TV"]["host"]) +":1926/"+str(config["TV"]["apiv"])+"/pair/grant", json=data, verify=False, auth=HTTPDigestAuth(self.config["TV"]["user"], self.config["TV"]["pass"]),timeout=2)
+                print("Username for subsequent calls is: " + str(self.config["TV"]["user"]))
+                print("Password for subsequent calls is: " + str(self.config["TV"]["pass"]))
+                return print("The credentials are saved in the settings.ini file.")
+            except Exception:
+                # try again
+                err_count += 1
+                continue
+        else:
+            return print("The API is unreachable. Try restarting your TV and pairing again")
 
-# initiates pairing with a TV
-def pair(config, count_err=0):
-    config['application_id'] = "app.id"
-    config['device_id'] = createDeviceId()
-    data = { 'scope' :  [ "read", "write", "control"] }
-    data['device']  = getDeviceSpecJson(config)
-    print("Starting pairing request")
-    pair_request(config,data)
+    # sends a general GET request
+    def get(self, path, verbose=True, err_count=0):
+        while err_count < int(self.config["DEFAULT"]["num_retries"]):
+            if verbose:
+                print("Sending GET request to", str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path))
+            try:
+                r = requests.get(str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path), verify=False, auth=HTTPDigestAuth(str(self.config["TV"]["user"]), str(self.config["TV"]["pass"])), timeout=2)
+            except Exception:
+                err_count += 1
+                continue
+            if verbose:
+                print("Request sent!")
+            if len(r.text) > 0:
+                print(r.text)
+                return r.text
+        else:
+            if self.config["DEFAULT"]["MQTT_listen"].lower()=="true" and len(sys.argv)==1:
+                self.mqtt_update_status({"power_on":False, "volume":None, "muted":False, "cur_app":"NA", "ambilight":None, "ambihue":False})
+            return json.dumps({"error":"Can not reach the API"})
+
+    # sends a general POST request
+    def post(self, path, body, verbose=True, callback=True, err_count=0):
+        while err_count < int(self.config["DEFAULT"]["num_retries"]):
+            if verbose:
+                print("Sending POST request to", str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path)) 
+            try:
+                r = requests.post(str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path), json=body, verify=False, auth=HTTPDigestAuth(str(self.config["TV"]["user"]), str(self.config["TV"]["pass"])), timeout=2)
+            except Exception:
+                err_count += 1
+                continue
+            if verbose:
+                print("Request sent!")
+            if callback and self.config["DEFAULT"]["MQTT_listen"].lower()=="true" and len(sys.argv)==1:
+                # run mqtt callback to update the status (only in MQTT mode)
+                self.mqtt_callback(path)
+            if len(r.text) > 0:
+                print(r.text)
+                return r.text
+            elif r.status_code == 200:
+                print(json.dumps({"response":"OK"}))
+                return json.dumps({"response":"OK"})
+        else:
+            if self.config["DEFAULT"]["MQTT_listen"].lower()=="true" and len(sys.argv)==1:
+                self.mqtt_update_status({"power_on":False, "volume":None, "muted":False, "cur_app":"NA", "ambilight":None, "ambihue":False})
+            return json.dumps({"error":"Can not reach the API"})
+
+    # runs a command
+    def run_command(self, command, body=None, verbose=True, callback=True):
+        if command in self.available_commands["get"]:
+            return self.get(self.available_commands["get"][command]["path"],verbose)
+        elif command in self.available_commands["post"]:
+            if "body" in self.available_commands["post"][command] and body is None:
+                return self.post(self.available_commands["post"][command]["path"],self.available_commands["post"][command]["body"],verbose, callback)
+            if "body" in self.available_commands["post"][command] and body is not None:
+                new_body = self.available_commands["post"][command]["body"]
+                if command == "ambilight_brightness":
+                    new_body["values"][0]["value"]["data"] = body
+                elif command == "ambilight_color":
+                    new_body["colorSettings"]["color"]["hue"] = int(body["hue"]*(255/360))
+                    new_body["colorSettings"]["color"]["saturation"]=int(body["saturation"]*(255/100))
+                    new_body["colorSettings"]["color"]["brightness"]=int(body["brightness"])
+                return self.post(self.available_commands["post"][command]["path"],new_body,verbose, callback)
+        else:
+            print("Unknown command")
+
+    # updates status immediately after sending a POST request. Currently works only for ambilight and ambihue.        
+    def mqtt_callback(self, path):
+        if "ambilight" or "ambihue" in path:
+            self.mqtt_update_ambilight()
+            self.mqtt_update_ambihue()
+
+    # starts MQTT listener that accepts Pylips commands               
+    def start_mqtt_listener(self):
+        def on_connect(client, userdata, flags, rc):
+            print("Connected to MQTT broker at", self.config["MQTT"]["host"])
+            client.subscribe(self.config["MQTT"]["topic_pylips"])
+        def on_message(client, userdata, msg):
+            if str(msg.topic)==self.config["MQTT"]["topic_pylips"]:
+                message = json.loads(msg.payload)
+                if "status" in message:
+                    self.mqtt_update_status(message["status"])
+                if "command" in message:
+                    body=None
+                    path=""
+                    if "body" in message:
+                        body = message["body"]
+                    if "path" in message:
+                        path = message["path"]
+                    if message["command"] == "get":
+                        if len(path)>0:
+                            return print("Please provide a 'path' argument")
+                        self.get(path,self.verbose)
+                    elif message["command"] == "post":
+                        if len(path)>0:
+                            return print("Please provide a 'path' argument")
+                        self.post(path, body, self.verbose)
+                    elif message["command"] != "post" and message["command"] != "get":
+                        self.run_command(message["command"],body, self.verbose)
+
+        self.mqtt = mqttc.Client()
+        self.mqtt.on_connect = on_connect
+        self.mqtt.on_message = on_message
+
+        if len(self.config["MQTT"]["user"])>0 and len(self.config["MQTT"]["pass"])>0:
+            self.mqtt.username_pw_set(self.config["MQTT"]["user"], self.config["MQTT"]["pass"])
+        if self.config["MQTT"]["TLS"].lower()=="true":
+            self.mqtt.tls_set()
+        self.mqtt.connect(str(self.config["MQTT"]["host"]), int(self.config["MQTT"]["port"]), 60)
+        self.mqtt.loop_start()
+
+    # publishes an update with TV status over MQTT
+    def mqtt_update_status(self, update):
+        new_status = dict(self.last_status, **update)
+        if json.dumps(new_status) != json.dumps(self.last_status):
+            self.last_status = new_status
+            self.mqtt.publish(str(self.config["MQTT"]["topic_status"]), json.dumps(self.last_status), retain = True)
     
-# a general GET request
-def get(config, verbose=1, count_err=0):
-    if count_err < 10:
-        try:
-            if verbose == 1:
-                print("Sending GET request to", config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'])
-            r = requests.get(config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'], verify=False, auth=config['auth'], timeout=2)
-        except Exception:
-            # try again
-            count_err += 1
-            return get(config, verbose, count_err)
-        if len(r.text) > 0:
-            print(r.text)
-        if verbose == 1:
-            print("Request sent!")
-    else:
-        print({"error":"Can not reach the API"})
-
-# a general POST request
-def post(config, verbose=1, count_err=0):
-    if count_err < 10:
-        try:
-            if verbose == 1:
-                print("Sending POST request to", config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'])
-            r = requests.post(config['api_protocol'] + config['address'] + ":" + config['api_port'] + "/" + config["api_version"] + "/" + config['path'], json=config['body'], verify=False, auth=config['auth'], timeout=2)
-        except Exception:
-            # try again
-            count_err += 1
-            return post(config, verbose, count_err)
-        if verbose == 1:
-            print("Request sent")
-        if len(r.text) > 0:
-            print(r.text)
-        else:
-            print({"response":"OK"})
-    else:
-        print({"error":"Can not reach the API"})
-
-def main():
-    config={}
-    config["api_version"] = "6"
-    parser = argparse.ArgumentParser(description='Control Philips TV API (version 6)')
-    parser.add_argument("--host", dest='host', help="TV's ip address")
-    parser.add_argument("--user", dest='user', help="Username")
-    parser.add_argument("--pass", dest='password', help="Password")
-    parser.add_argument("--command", help="Command to run", default="pair")
-    parser.add_argument("--path", dest='path', help="API's endpoint path")
-    parser.add_argument("--body", dest='body', help="Body for post requests")
-    parser.add_argument("--verbose", dest='verbose', help="Display feedback", default=1)
-    args = parser.parse_args()
-
-    if args.host is None:
-        return print("Please set your TV's IP-address with a --host parameter")
-
-    config['address'] = args.host
-
-    if args.body is not None:
-        config["body"] = json.loads(args.body)
- 
-    if args.command == "pair":
-        choice=""
-        while choice != "exit":
-            choice = input('Would you like to pair with your TV? [Y/n]').lower()
-            yes = {'yes','y', 'ye', ''}
-            no = {'no','n'}
-            if choice in yes:
-                pair(config)
-                return
-            elif choice in no:
-                return print ("If you have an Android TV, please provide both a username and a password (--user and --pass)")
-            else:
-                sys.stdout.write("Please respond with 'yes' or 'no' \n")
-
-    if args.user and args.password:
-        config['device_id'] = args.user
-        config['auth_key'] = args.password
-        config['api_port'] = "1926"
-        config['api_protocol'] = "https://"
-        config['auth'] = HTTPDigestAuth(config['device_id'], config['auth_key'])
-    elif args.user is None and args.password is None:
-        config['api_port'] = "1925"
-        config['api_protocol'] = "http://"
-        config['auth'] = None
-    else:
-        return print ("If you have an Android TV, please provide both a username and a password (--user and --pass)")
- 
-    # Built-in GET commands (basically wrappers around common API calls)
-    available_commands_get={
-        "current_channel": {
-            "path": "activities/tv"
-        },
-        "list_channels": {
-            "path": "channeldb/tv/channelLists/all"
-        },
-        "list_favorite": {
-            "path": "channeldb/tv/favoritelLists/all"
-        },
-        "powerstate": {
-            "path": "powerstate"
-        }
-    }
+    # updates ambilight for MQTT status
+    def mqtt_update_ambilight(self):
+        ambilight_status = self.get("ambilight/currentconfiguration",self.verbose)
+        if ambilight_status is not None:
+            ambilight_status = json.loads(ambilight_status)
+            if "styleName" in ambilight_status:
+                ambilight = ambilight_status
+                if json.dumps(self.last_status["ambilight"]) != json.dumps(ambilight):
+                    self.mqtt.publish(str(self.config["MQTT"]["topic_pylips"]), json.dumps({"status":{"ambilight":ambilight, "power_on":True}}), retain = False)
     
-    # Built-in POST commands (user-specified body)
-    if "body" in config:
-        available_commands_post_custom ={
-            "launch_app": {
-                "path": "activities/launch",
-                "body": config["body"],
-                },
-            "set_channel": {
-                "path": "activities/tv",
-                "body": config["body"],
-                },
+    # updates ambihue for MQTT status
+    def mqtt_update_ambihue(self):
+        ambihue_status = self.run_command("ambihue_status",None,self.verbose, False)
+        if ambihue_status is not None:
+            ambihue_status = json.loads(ambihue_status)
+            if "values" in ambihue_status:
+                ambihue = ambihue_status["values"][0]["value"]["data"]["value"]
+                if self.last_status["ambihue"] != ambihue:
+                    self.mqtt.publish(str(self.config["MQTT"]["topic_pylips"]), json.dumps({"status":{"ambihue":ambihue, "power_on":True}}), retain = False)
 
-        }
-    else:
-        available_commands_post_custom={}
-    # Built-in POST commands (basically wrappers around common API calls)
-    available_commands_post ={
-        "ambilight_on": {
-            "path": "ambilight/power",
-            "body": {
-                "power": "On"
-            }
-        },
-        "ambilight_off": {
-            "path": "ambilight/power",
-            "body": {
-            "power": "Off"
-            }
-        },
-        "ambilight_video_immersive": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_VIDEO",
-                "isExpert": "false",
-                "menuSetting": "IMMERSIVE"
-            }
-        },
-        "ambilight_video_standard": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_VIDEO",
-                "isExpert": "false",
-                "menuSetting": "STANDARD"
-            }
-        },
-        "ambilight_video_natural": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_VIDEO",
-                "isExpert": "false",
-                "menuSetting": "NATURAL"
-            }
-        },
-        "ambilight_video_vivid": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_VIDEO",
-                "isExpert": "false",
-                "menuSetting": "VIVID"
-            }
-        },
-        "ambilight_video_game": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_VIDEO",
-                "isExpert": "false",
-                "menuSetting": "GAME"
-            }
-        },
-        "ambilight_video_comfort": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_VIDEO",
-                "isExpert": "false",
-                "menuSetting": "COMFORT"
-            }
-        },
-        "ambilight_video_relax": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_VIDEO",
-                "isExpert": "false",
-                "menuSetting": "RELAX"
-            }
-        },
-        "ambilight_audio_adapt_brightness": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_AUDIO",
-                "isExpert": "false",
-                "menuSetting": "ENERGY_ADAPTIVE_BRIGHTNESS"
-            }
-        },
-        "ambilight_audio_adapt_colors": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_AUDIO",
-                "isExpert": "false",
-                "menuSetting": "ENERGY_ADAPTIVE_COLORS"
-            }
-        },
-        "ambilight_audio_vu_meter": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_AUDIO",
-                "isExpert": "false",
-                "menuSetting": "VU_METER"
-            }
-        },
-        "ambilight_audio_spectrum": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_AUDIO",
-                "isExpert": "false",
-                "menuSetting": "SPECTRUM_ANALYZER"
-            }
-        },
-        "ambilight_audio_knight_rider_1": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_AUDIO",
-                "isExpert": "false",
-                "menuSetting": "KNIGHT_RIDER_CLOCKWISE"
-            }
-        },
-        "ambilight_audio_knight_rider_2": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_AUDIO",
-                "isExpert": "false",
-                "menuSetting": "KNIGHT_RIDER_ALTERNATING"
-            }
-        },
-        "ambilight_audio_flash": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_AUDIO",
-                "isExpert": "false",
-                "menuSetting": "RANDOM_PIXEL_FLASH"
-            }
-        },
-        "ambilight_audio_strobo": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_AUDIO",
-                "isExpert": "false",
-                "menuSetting": "STROBO"
-            }
-        },
-        "ambilight_audio_party": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_AUDIO",
-                "isExpert": "false",
-                "menuSetting": "PARTY"
-            }
-        },
-        "ambilight_audio_random": {
-            "path": "ambilight/currentconfiguration",
-            "body": {
-                "styleName": "FOLLOW_AUDIO",
-                "isExpert": "false",
-                "menuSetting": "MODE_RANDOM"
-            }
-        },
-        "ambihue_status": {
-            "path": "menuitems/settings/current",
-            "body": {
-                "nodes": [
-                    {
-                        "nodeid": 2131230774
-                    }
-                ]
-            }
-        },
-        "ambihue_on": {
-            "path": "menuitems/settings/update",
-            "body": {
-                "values": [
-                    {
-                        "value": {
-                            "Nodeid": 2131230774,
-                            "Controllable": "true",
-                            "Available": "true",
-                            "data": {
-                                "value": "true"
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        "ambihue_off": {
-            "path": "menuitems/settings/update",
-            "body": {
-                "values": [
-                    {
-                        "value": {
-                            "Nodeid": 2131230774,
-                            "Controllable": "true",
-                            "Available": "true",
-                            "data": {
-                                "value": "false"
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        "standby": {
-            "path": "input/key",
-            "body": {
-                "key": "Standby"
-            }
-        },
-        "mute": {
-            "path": "input/key",
-            "body": {
-                "key": "Mute"
-            }
-        },
-        "volume_up": {
-            "path": "input/key",
-            "body": {
-                "key": "VolumeUp"
-            }
-        },
-        "volume_down": {
-            "path": "input/key",
-            "body": {
-                "key": "VolumeDown"
-            }
-        },
-        "channel_up": {
-            "path": "input/key",
-            "body": {
-                "key": "ChannelStepUp"
-            }
-        },
-        "channel_down": {
-            "path": "input/key",
-            "body": {
-                "key": "ChannelStepDown"
-            }
-        },
-        "play": {
-            "path": "input/key",
-            "body": {
-                "key": "Play"
-            }
-        },
-        "pause": {
-            "path": "input/key",
-            "body": {
-                "key": "Pause"
-            }
-        },
-        "play_pause": {
-            "path": "input/key",
-            "body": {
-                "key": "PlayPause"
-            }
-        },
-        "stop": {
-            "path": "input/key",
-            "body": {
-                "key": "Stop"
-            }
-        },
-        "fast_forward": {
-            "path": "input/key",
-            "body": {
-                "key": "FastForward"
-            }
-        },
-        "rewind": {
-            "path": "input/key",
-            "body": {
-                "key": "Rewind"
-            }
-        },
-        "next": {
-            "path": "input/key",
-            "body": {
-                "key": "Next"
-            }
-        },
-        "previous": {
-            "path": "input/key",
-            "body": {
-                "key": "Previous"
-            }
-        },
-        "cursor_up": {
-            "path": "input/key",
-            "body": {
-                "key": "CursorUp"
-            }
-        },
-        "cursor_down": {
-            "path": "input/key",
-            "body": {
-                "key": "CursorDown"
-            }
-        },
-        "cursor_left": {
-            "path": "input/key",
-            "body": {
-                "key": "CursorLeft"
-            }
-        },
-        "cursor_right": {
-            "path": "input/key",
-            "body": {
-                "key": "CursorRight"
-            }
-        },
-        "confirm": {
-            "path": "input/key",
-            "body": {
-                "key": "Confirm"
-            }
-        },
-        "back": {
-            "path": "input/key",
-            "body": {
-                "key": "Back"
-            }
-        },
-        "find": {
-            "path": "input/key",
-            "body": {
-                "key": "Find"
-            }
-        },
-        "red": {
-            "path": "input/key",
-            "body": {
-                "key": "RedColour"
-            }
-        },
-        "green": {
-            "path": "input/key",
-            "body": {
-                "key": "GreenColour"
-            }
-        },
-        "yellow": {
-            "path": "input/key",
-            "body": {
-                "key": "YellowColour"
-            }
-        },
-        "blue": {
-            "path": "input/key",
-            "body": {
-                "key": "BlueColour"
-            }
-        },
-        "home": {
-            "path": "input/key",
-            "body": {
-                "key": "Home"
-            }
-        },
-        "options": {
-            "path": "input/key",
-            "body": {
-                "key": "Options"
-            }
-        },
-        "dot": {
-            "path": "input/key",
-            "body": {
-                "key": "Dot"
-            }
-        },
-        "digit_0": {
-            "path": "input/key",
-            "body": {
-                "key": "Digit0"
-            }
-        },
-        "digit_1": {
-            "path": "input/key",
-            "body": {
-                "key": "Digit1"
-            }
-        },
-        "digit_2": {
-            "path": "input/key",
-            "body": {
-                "key": "Digit2"
-            }
-        },
-        "digit_3": {
-            "path": "input/key",
-            "body": {
-                "key": "Digit3"
-            }
-        },
-        "digit_4": {
-            "path": "input/key",
-            "body": {
-                "key": "Digit4"
-            }
-        },
-        "digit_5": {
-            "path": "input/key",
-            "body": {
-                "key": "Digit5"
-            }
-        },
-        "digit_6": {
-            "path": "input/key",
-            "body": {
-                "key": "Digit6"
-            }
-        },
-        "digit_7": {
-            "path": "input/key",
-            "body": {
-                "key": "Digit7"
-            }
-        },
-        "digit_8": {
-            "path": "input/key",
-            "body": {
-                "key": "Digit8"
-            }
-        },
-        "digit_9": {
-            "path": "input/key",
-            "body": {
-                "key": "Digit9"
-            }
-        },
-        "info": {
-            "path": "input/key",
-            "body": {
-                "key": "Info"
-            }
-        },
-        "adjust": {
-            "path": "input/key",
-            "body": {
-                "key": "Adjust"
-            }
-        },
-        "watch_tv": {
-            "path": "input/key",
-            "body": {
-                "key": "WatchTV"
-            }
-        },
-        "viewmode": {
-            "path": "input/key",
-            "body": {
-                "key": "Viewmode"
-            }
-        },
-        "teletext": {
-            "path": "input/key",
-            "body": {
-                "key": "Teletext"
-            }
-        },
-        "subtitle": {
-            "path": "input/key",
-            "body": {
-                "key": "Subtitle"
-            }
-        },
-        "source": {
-            "path": "input/key",
-            "body": {
-                "key": "Source"
-            }
-        },
-        "ambilight_onoff": {
-            "path": "input/key",
-            "body": {
-                "key": "AmbilightOnOff"
-            }
-        },
-        "record": {
-            "path": "input/key",
-            "body": {
-                "key": "Record"
-            }
-        },
-        "online": {
-            "path": "input/key",
-            "body": {
-                "key": "Online"
-            }
-        }
-    }
+    # updates current app for MQTT status
+    def mqtt_update_app(self):
+        actv_status = self.run_command("current_app",None,self.verbose, False)
+        if actv_status is not None:
+            actv_status=json.loads(actv_status)
+            if "component" in actv_status:
+                if actv_status["component"]["packageName"] == "org.droidtv.zapster" or actv_status["component"]["packageName"] =="NA":
+                    self.mqtt_update_channel()
+                else:
+                    if self.last_status["cur_app"] != actv_status["component"]["packageName"]:
+                        self.mqtt.publish(str(self.config["MQTT"]["topic_pylips"]), json.dumps({"status":{"cur_app":actv_status["component"]["packageName"], "power_on":True}}), retain = False)
 
-    if args.command in available_commands_post:
-        config['path'] = available_commands_post[args.command]['path']
-        config['body'] = available_commands_post[args.command]['body']
-        return post(config, int(args.verbose))
+    # updates current channel for MQTT status
+    def mqtt_update_channel(self):
+        channel = self.run_command("current_channel",None,self.verbose, False)
+        if channel is not None:
+            channel=json.loads(channel)
+            if "channel" in channel:
+                if json.dumps(self.last_status["cur_app"]) != json.dumps({"app":"TV","channel":channel}):
+                    self.mqtt.publish(str(self.config["MQTT"]["topic_pylips"]), json.dumps({"status":{"cur_app":{"app":"TV","channel":channel}, "power_on":True}}), retain = False)
+    
+    # updates volume and mute state for MQTT status
+    def mqtt_update_volume(self):
+        vol_status = self.run_command("volume",None,self.verbose, False)
+        if vol_status is not None:
+            vol_status = json.loads(vol_status)
+            if "muted" in vol_status:
+                muted = vol_status["muted"]
+                volume = vol_status["current"]
+                if self.last_status["muted"] != muted or self.last_status["volume"] != volume:
+                    self.mqtt.publish(str(self.config["MQTT"]["topic_pylips"]), json.dumps({"status":{"muted":muted, "volume":volume, "power_on":True}}), retain = False)
 
-    if args.command in available_commands_post_custom:
-        config['path'] = available_commands_post_custom[args.command]['path']
-        config['body'] = available_commands_post_custom[args.command]['body']
-        return post(config, int(args.verbose))
-
-    if args.command in available_commands_get:
-        config['path'] = available_commands_get[args.command]['path']
-        return get(config,int(args.verbose))
-
-    # a general GET request for custom commands
-    elif args.command == "get":
-        if args.path:
-            config['path'] = args.path
-            return get(config, int(args.verbose))
-        else:
-            print("For general GET requests --path is required") 
-            
-    # a general POST request for custom commands
-    elif args.command == "post":
-        if args.body and args.path:
-            config['path'] = args.path
-            config['body'] = json.loads(args.body)
-            return post(config, int(args.verbose))
-        else:
-            print("For general POST requests --path and --body are required") 
-
-    else:
-        print("Unknown command", args.command)
+    # runs MQTT update functions with a specified update interval
+    def start_mqtt_updater(self, verbose=True):
+        print("Started MQTT status updater")
+        while True:
+            self.mqtt_update_volume()
+            self.mqtt_update_app()
+            self.mqtt_update_ambilight()
+            self.mqtt_update_ambihue()
+            time.sleep(int(self.config["DEFAULT"]["update_interval"]))
 
 if __name__ == '__main__':
-    main()
+    pylips = Pylips("settings.ini")
