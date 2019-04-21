@@ -396,7 +396,6 @@ class Pylips:
                 muted = vol_status["muted"]
                 volume = vol_status["current"]
                 if self.last_status["muted"] != muted or self.last_status["volume"] != volume:
-                    print('ooops')
                     self.mqtt.publish(str(self.config["MQTT"]["topic_pylips"]), json.dumps({"status":{"muted":muted, "volume":volume, "power_on":True}}), retain = False)
 
     # runs MQTT update functions with a specified update interval
