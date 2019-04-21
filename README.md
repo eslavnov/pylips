@@ -1,18 +1,23 @@
 # Pylips
-Pylips is a Python tool to control Philips TVs (2016+) through their reverse-engineered API.
+Pylips is a Python tool to control Philips TVs (2015+) through their reverse-engineered API. 
 
-There are some similar modules available, but they lack documentation, miss some API methods and sometimes have outdated code. This module is the most complete one in terms of both functionality and documentation. It supports both Android and non-Android Philips TVs.
-
-**It is also the only module that allows toggling 'Ambilight + Hue' setting.**
+1. Supports both Android and non-Android TVs
+1. 80 built-in commands + support for custom "GET" and "POST" requests to the API
+1. All commands work on TVs with API version 6, most of them also work for API version 5
+1. Full control of Ambilight including color, brightness, mode and 'Ambilight + Hue'
+1. Allows sending TV status updates and receiving commands over MQTT
 
 The current version of the API does not allow switching input sources anymore (?), use [this tool](https://github.com/eslavnov/android-tv-remote) instead (Android TVs only).
 
 ## Table of contents ##
 1. [Prerequisites](#prerequisites)
-1. [Pairing with the TV (Android TVs only)](#pairing-with-the-tv-android-tvs-only)
-1. [Controlling the TV](#controlling-the-tv)
+1. [Setting up Pylips](#setting-up-pylips)
+    1. [New users](#new-users)
+    1. [Migrating from older versions](#migrating-from-older-versions)
+1. [Controlling the TV (manual mode)](#controlling-the-tv-manual-mode)
     1. [Built-in commands](#built-in-commands)
     1. [Custom commands](#custom-commands)
+1. [Controlling the TV (MQTT mode)](#controlling-the-tv-mqtt-mode)
 1. [API reference](#api-reference)
 1. [Change log](#change-log)
 1. [TO-DO](#to-do)
@@ -29,41 +34,67 @@ pip install -r requirements.txt
 
 You may have to use `pip3` and `python3` instead of `pip` and `python` depending on how these tools are installed on your system.
 
-**If your TV has Android, you have to pair with the TV first to get a username/password which you will need to provide with `--user` and `--pass` parameters for all future calls.**
+## Setting up Pylips
 
-**If your TV does not have Android, you do NOT need to pair with the TV. You should also NEVER use `--user` and `--pass` parameters - they are required for Android TVs only.**
+### New users ###
 
-## Pairing with the TV (Android TVs only)
-
-To use this tool with your Philips Android TV you will need a username and a password, which you can get by running the tool with a `-- host` parameter (your TV's ip address):
-
+To begin using Pylips you first need to add the ip adress of your TV to the [TV] section in the `settings.ini` file. If you want to use MQTT, you will also need to fill in the [MQTT] section and set the required flags in the [DEFAULT] section:
 ```
-python pylips.py --host 192.168.201.10
+[DEFAULT]
+verbose = True          # show various debug output
+MQTT_listen = False     # listen for MQTT commands. Requires correct [MQTT] settings
+MQTT_update = False     # publish status updates over MQTT. Requires correct [MQTT] settings
+num_retries = 3         # number of retries when sending requests. No need to change it unless your network sucks.
+update_interval = 3     # interval between updates in seconds (used if MQTT_update = True). Your TV might not appreciate lower values.
+[TV]
+host =                  # TV's ip address
+port =                  # will be discovered automatically, but you can override it here
+apiv =                  # will be discovered automatically, but you can override it here
+user =                  # will be discovered automatically (if required for your TV model), but you can override it here
+pass =                  # will be discovered automatically (if required for your TV model), but you can override it here
+protocol =              # will be discovered automatically, but you can override it here
+[MQTT]
+host =                  # your MQTT broker's ip address
+port =                  # your MQTT broker's port
+user =                  # your MQTT username
+pass =                  # your MQTT password
+TLS = False             # use TLS        
+topic_pylips =          # Pylips will listen for commands to this topic
+topic_status =          # Pylips will send status updates to this topic
 ```
-The TV will display a 4-digit pin-code that you need to input to get a username and password. 
 
-**Write down the username and password since they are required for all future calls!**
+Now turn your TV on and run Pylips without any arguments to complete setting it up (it will discover your TV's API version, port and protocol + pair and save the credentials if required):
+
+`python pylips.py`
+
+Once it's done, you are ready to use Pylips!
 
 **Security note:**
 
-To pair with the TV we need to create a HMAC signature using an 88-character (?) key. As far as I can tell the key is used for pairing only. With that in mind and to make this tool as user-friendly as possible, the key is hardcoded. I see no security issues with this but if you are extremely paranoid you can change it: look for a `secret_key` in the beginning of the code.
+To pair with the Android TVs we need to create a HMAC signature using an 88-character (?) key. As far as I can tell the key is used for pairing only. With that in mind and to make this tool as user-friendly as possible, the key is hardcoded. I see no security issues with this but if you are extremely paranoid you can change it: look for a `secret_key` in the beginning of the code.
 
-## Controlling the TV ##
-You can take advantage of some of the built-in commands (to be extended) or send your own custom commands.
+### Migrating from older versions ###
 
-Add `--verbose 0` to any command if you don't want to see the feedback in your terminal (useful for command line sensors).
+The new version of Pylips is 100% backwards-compatible with the old arguments and commands, so you don't have to change anything to keep using it, but every call will take slightly longer to identify the API version. Follow the instructions for the new users to save your API version in `settings.ini`, then it will run faster. If you want to override the API version check you can also use the `--apiv` parameter (manual mode only). Finally, you still need to follow the instructions for the new users to take advantage of MQTT. 
+
+## Controlling the TV (manual mode) ##
+You can take advantage of some of the built-in commands or send your own custom commands.
 
 ### Built-in commands ###
 ```
 python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command %command%
 ```
 
-Skip the `--user` and `--pass` parameters if your TV does not have Android.
+Any passed arguments will override the settings in `settings.ini` without overwriting them. If you have already run the discovery for new users, you don't have to specify `--host`, `--user` and `-pass` parameters. Also skip the `--user` and `--pass` parameters if your TV does not have Android. Add `--verbose False` to any command if you don't want to see the feedback in your terminal (useful for command line sensors). 
+
 
 **Available built-in commands:**
 
-&nbsp; &nbsp; &nbsp; &nbsp; **TV power:**
-1. `powerstate` - Returns the current power state of the TV ('On' or 'Off')
+&nbsp; &nbsp; &nbsp; &nbsp; **TV status:**
+1. `powerstate` - Returns current power state of the TV ('On' or 'Off')
+1. `volume` - Returns current volume and mute status
+1. `current_channel` - Returns current channel (if in TV mode)
+1. `current_app` - Returns current app (Android TVs only)
 
    **TV remote keys:**
 1. `standby` - Sends Standby key
@@ -116,7 +147,6 @@ Skip the `--user` and `--pass` parameters if your TV does not have Android.
 1. `digit_9` - Sends Digit9 key
 
    **TV channels:**
-1. `current_channel` - Returns current channel (if in TV mode)
 1. `set_channel` - Turns a specified channel on. Requires a valid `--body` argument, see [API reference](https://github.com/eslavnov/pylips/wiki/Activities-TV-(GET)/) to get it.
 1. `list_channels` - Returns channel list
 1. `list_favorite` - Returns favorite list
@@ -127,6 +157,8 @@ Skip the `--user` and `--pass` parameters if your TV does not have Android.
 1. `ambihue_status` - Returns the current status of 'Ambilight + Hue'
 1. `ambihue_on` - Turns 'Ambilight + Hue' on
 1. `ambihue_off` - Turns 'Ambilight + Hue' off
+1. `ambilight_color` - Sets ambilight color. Requires a valid `--body` argument: `{"hue": 360, "saturation": 100, "brightness": 255}`
+1. `ambilight_brightness` - Sets ambilight brightness. Requires a valid `--body` argument: `{"value": 10}`
 1. `ambilight_video_immersive` - Sets Ambilight to 'Follow video' (Immersive)
 1. `ambilight_video_standard` - Sets Ambilight to 'Follow video' (Standard)
 1. `ambilight_video_natural` - Sets Ambilight to 'Follow video' (Natural)
@@ -171,7 +203,7 @@ python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --
 ```
 
 ### Custom commands ###
-The tools exposes two general commands to talk to the TV's API: `get` (sends GET request and *gets* back some data like ambilight mode) and `post` (sends POST request that *posts* some data and changes something in the TV - like turning the ambilight off).
+The tools exposes two general commands to talk to the TV's API: `get` (sends GET request and *gets* back some data like ambilight mode) and `post` (sends POST request that *posts* some data and changes something in the TV - like turning the ambilight off). You can also add custom commands to `available_commands.json`.
 
 Read the API reference first to understand available endpoints and how to use them. There are some unexpected things like:
 * Pairing process returns objects like '{"error_id":"SUCCESS"}' (why, Philips?!)
@@ -191,22 +223,70 @@ python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --
 To use the `post` method you need to provide a path to the required endpoint with a `--path` argument and the body of your POST request with a `--body` argument. For example, this will send a post request to the `menuitems/settings/current` endpoint with a body that will get back the status of 'Ambilight + Hue' (notice that the `--body` argument **needs to come inside the quotes**):
 
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command get --path menuitems/settings/current --body '{"nodes":[{"nodeid":2131230774}]}'
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command post --path menuitems/settings/current --body '{"nodes":[{"nodeid":2131230774}]}'
 ```
+## Controlling the TV (MQTT mode) ##
+Pylips can connect to your MQTT broker to listen for commands and to publish TV status updates.
+
+Edit the `settings.ini` according to your config and simply run `python pylips.py` without any arguments to run in MQTT mode.
+
+Enabling `MQTT_listen` in `settings.ini` will allow you to send commands to a topic specified in `topic_pylips` by posting a JSON message. This works pretty much the same as sending manual commands: your arguments become keys and their values - values of these keys. See examples:
+
+```
+# built-in commands
+
+#Manual mode: 
+python pylips.py --command ambihue_on
+
+# MQTT mode: 
+{ "command": "ambihue_on" }  
+```
+```
+# general post request
+
+#Manual mode: 
+python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command post --path menuitems/settings/current --body '{"nodes":[{"nodeid":2131230774}]}
+
+# MQTT mode:
+{ "command": "post", "path": "menuitems/settings/current", "body": {"nodes":[{"nodeid":2131230774}]} }
+```
+
+Enabling `MQTT_update` in `settings.ini` will publish status updates to `topic_status` like these:
+```
+{"power_on": true, "volume": 28, "muted": false, "cur_app": "org.droidtv.settings", "ambilight": {"styleName": "FOLLOW_VIDEO", "isExpert": false, "menuSetting": "IMMERSIVE"}, "ambihue": false}
+```
+```
+{"power_on": true, "volume": 28, "muted": false, "cur_app": {"app": "TV", "channel": {"channel": {"ccid": 644, "preset": "15", "name": "Comedy Central HD"}, "channelList": {"id": "allcab", "version": "19"}}}, "ambilight": {"styleName": "OFF", "isExpert": false}, "ambihue": false}
+```
+
 ## API reference
 The TV's API is roughly based on [JointSpace](http://jointspace.sourceforge.net/) with a current version of 6.2. The only available official documentation that I was able to find is for JointSpace version 1, which is incredibly outdated. 
 
-Since no official API documentation is available, I've decided to collect and document to the best of my knowledge all endpoints that are working in API version 6+ (Philips TVs 2016-2018). This API reference is based on:
+Since no official API documentation is available, I've decided to collect and document to the best of my knowledge all endpoints that are working in API version 6+ (Philips TVs 2016-2018). Most of them should also work for API version 5 (2015 TVs). This API reference is based on:
 * [Official JointSpace documentation](http://jointspace.sourceforge.net/projectdata/documentation/jasonApi/1/doc/API.html)
 * Community endpoints (various endpoints discovered by the community over the years)
 * Endpoints discovered by using a man-in-the-middle attack on an iPhone running an official Philips TV remote app (this finally allowed to discover an endpoint responsible for toggling 'Ambilight + Hue' mode among other things)
 
-All endpoints in API reference are tested and fully working unless explicitly marked otherwise. Some channel endpoints are missing since I can not test them until January 2019. Any comments, new endpoints and fixes to the API reference are incredibly welcome.
+All endpoints in API reference are tested and fully working unless explicitly marked otherwise. Any comments, new endpoints and fixes to the API reference are incredibly welcome.
 
-[The API reference (work in progress)](https://github.com/eslavnov/Pylips/wiki).
+[The API reference](https://github.com/eslavnov/Pylips/wiki).
 
 ## Change log
 
+### 1.0.0 - 2019-04-21
+**Changed**
+- Most of the app was rewritten, but it's backward-compatible with previous versions.
+- Pylips is now a Python class so you can potentially integrate it with your other projects
+
+**Added**
+- Config file so you don't have to pass the same parameters every time
+- Automatic discovery of your TV's API version, port and protocol
+- Automatic pairing for Android TVs
+- Support for API version 5 + any newer versions should also work (unless Philips breaks something in the future versions of the API)
+- MQTT listener: send commands to Pylips over MQTT
+- MQTT updater: Pylips can listen for TV status updates and send them over MQTT
+- Extend built-in commands (set ambilight color, set ambilight brightness, get current volume, get current app)
+- Move built-in commands to a separate JSON file
 
 ### 0.4 - 2019-01-28
 **Added**
@@ -226,13 +306,21 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 Initial release
 
 ## TO-DO
-1. Finish documenting and testing all available API endpoints (January 2019)
-2. Increase number of built-in commands
-3. Improve error handling when sending requests
-4. User-friendly way of changing Ambilight colors
-5. Move settings to a config file
-6. MQTT server support
-7. Home assistant integration
+~1. Finish documenting and testing all available API endpoints (January 2019)~ DONE
+
+~2. Increase number of built-in commands~ DONE
+
+~3. Improve error handling when sending requests~ DONE
+
+~4. User-friendly way of changing Ambilight colors~ DONE
+
+~5. Move settings to a config file~ DONE
+
+~6. MQTT server support~ DONE
+
+~7. Home assistant integration~ CANCELLED: not needed since you can now integrate it with MQTT sensors/switches.
+
+At this point I consider the tool to be completed. No new functionality is planned, but I will fix any reported bugs and add any missing API endpoints/commands. [Open an issue](https://github.com/eslavnov/pylips/issues) with your problem/suggestions.
 
 ## Acknowledgements
 1. TV pairing mechanism as well as the inspiration for this tool come from [@suborb](https://github.com/suborb)'s brilliant [repo](https://github.com/suborb/philips_android_tv).
