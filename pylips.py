@@ -91,7 +91,7 @@ class Pylips:
                     self.start_mqtt_listener()
                     if self.config["DEFAULT"]["mqtt_update"] == "True":
                         # Update TV status and publish any changes
-                        self.last_status = {}
+                        self.last_status = {"powerstate": None, "volume":None, "muted":False, "cur_app":None, "ambilight":None, "ambihue":False}
                         self.start_mqtt_updater(self.verbose)
                 else:
                     print("Please specify host in MQTT section in settings.ini to use MQTT")
@@ -246,7 +246,7 @@ class Pylips:
                 return r.text
         else:
             if self.config["DEFAULT"]["mqtt_listen"].lower()=="true":
-                self.mqtt_update_status({"powerstate":"Off", "volume":None, "muted":False, "cur_app":"NA", "ambilight":None, "ambihue":False})
+                self.mqtt_update_status({"powerstate":"Off", "volume":None, "muted":False, "cur_app":None, "ambilight":None, "ambihue":False})
             return json.dumps({"error":"Can not reach the API"})
 
     # sends a general POST request
@@ -272,7 +272,7 @@ class Pylips:
                 return json.dumps({"response":"OK"})
         else:
             if self.config["DEFAULT"]["mqtt_listen"].lower()=="true":
-                self.mqtt_update_status({"powerstate":"Off", "volume":None, "muted":False, "cur_app":"NA", "ambilight":None, "ambihue":False})
+                self.mqtt_update_status({"powerstate":"Off", "volume":None, "muted":False, "cur_app":None, "ambilight":None, "ambihue":False})
             return json.dumps({"error":"Can not reach the API"})
 
     # runs a command
@@ -348,18 +348,18 @@ class Pylips:
     
     # updates powerstate for MQTT status and returns True if TV is on
     def mqtt_update_powerstate(self):
-        powerstate_status = self.run_command("powerstate",self.verbose)
+        powerstate_status = self.get("powerstate",self.verbose)
         if powerstate_status is not None:
             powerstate_status = json.loads(powerstate_status)
-            if "powerstate" in powerstate_status and "powerstate" in self.last_status:
-                if self.last_status["powerstate"] != powerstate_status['powerstate']:
+            if "powerstate" in powerstate_status:
+                if "powerstate" in self.last_status and self.last_status["powerstate"] != powerstate_status['powerstate']:
                     self.mqtt.publish(str(self.config["MQTT"]["topic_pylips"]), json.dumps({"status":{"powerstate":powerstate_status['powerstate']}}), retain = False)
                 if powerstate_status['powerstate'].lower()=="on":
                     return True
             else:
-                self.mqtt_update_status({"powerstate":"Off", "volume":None, "muted":False, "cur_app":"NA", "ambilight":None, "ambihue":False})
+                self.mqtt_update_status({"powerstate":"Off", "volume":None, "muted":False, "cur_app":None, "ambilight":None, "ambihue":False})
         else:
-                self.mqtt_update_status({"powerstate":"Off", "volume":None, "muted":False, "cur_app":"NA", "ambilight":None, "ambihue":False})
+                self.mqtt_update_status({"powerstate":"Off", "volume":None, "muted":False, "cur_app":None, "ambilight":None, "ambihue":False})
         return False
 
     # updates ambilight for MQTT status
@@ -391,7 +391,7 @@ class Pylips:
                 if actv_status["component"]["packageName"] == "org.droidtv.zapster" or actv_status["component"]["packageName"] =="NA":
                     self.mqtt_update_channel()
                 else:
-                    if self.last_status["cur_app"] != actv_status["component"]["packageName"]:
+                    if self.last_status["cur_app"] is None or self.last_status["cur_app"] != actv_status["component"]["packageName"]:
                         self.mqtt.publish(str(self.config["MQTT"]["topic_pylips"]), json.dumps({"status":{"cur_app":actv_status["component"]["packageName"]}}), retain = False)
 
     # updates current channel for MQTT status
