@@ -273,6 +273,13 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 ## Change log
 
+### 1.0.1 - 2019-04-25
+**Changed**
+- Fixed a bug in pairing (Android TVs)
+
+**Added**
+- "Standby" TV status (MQTT mode)
+
 ### 1.0.0 - 2019-04-21
 **Changed**
 - Most of the app was rewritten, but it's backward-compatible with previous versions.
