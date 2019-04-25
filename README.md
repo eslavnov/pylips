@@ -253,10 +253,10 @@ python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --
 
 Enabling `MQTT_update` in `settings.ini` will publish status updates to `topic_status` like these:
 ```
-{"power_on": true, "volume": 28, "muted": false, "cur_app": "org.droidtv.settings", "ambilight": {"styleName": "FOLLOW_VIDEO", "isExpert": false, "menuSetting": "IMMERSIVE"}, "ambihue": false}
+{"powerstate": "On", "volume": 28, "muted": false, "cur_app": "org.droidtv.settings", "ambilight": {"styleName": "FOLLOW_VIDEO", "isExpert": false, "menuSetting": "IMMERSIVE"}, "ambihue": false}
 ```
 ```
-{"power_on": true, "volume": 28, "muted": false, "cur_app": {"app": "TV", "channel": {"channel": {"ccid": 644, "preset": "15", "name": "Comedy Central HD"}, "channelList": {"id": "allcab", "version": "19"}}}, "ambilight": {"styleName": "OFF", "isExpert": false}, "ambihue": false}
+{"powerstate": "On", "volume": 28, "muted": false, "cur_app": {"app": "TV", "channel": {"channel": {"ccid": 644, "preset": "15", "name": "Comedy Central HD"}, "channelList": {"id": "allcab", "version": "19"}}}, "ambilight": {"styleName": "OFF", "isExpert": false}, "ambihue": false}
 ```
 
 ## API reference
@@ -272,6 +272,11 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 [The API reference](https://github.com/eslavnov/Pylips/wiki).
 
 ## Change log
+
+### 1.0.1 - 2019-04-25
+**Changed**
+- Fixed a bug in pairing (Android TVs)
+- Changed `power_on` to `powerstate` in TV status, so now we support "Standby" and possibly other modes (MQTT-only)
 
 ### 1.0.0 - 2019-04-21
 **Changed**
