@@ -13,6 +13,7 @@ from base64 import b64encode,b64decode
 from Crypto.Hash import SHA, HMAC
 from requests.auth import HTTPDigestAuth
 import paho.mqtt.client as mqttc
+import os 
 
 # Suppress "Unverified HTTPS request is being made" error message
 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
@@ -35,6 +36,7 @@ class Pylips:
     def __init__(self, ini_file):
         # read config file
         self.config = configparser.ConfigParser()
+        print(os.path.dirname(os.path.realpath(__file__))+"/"+ini_file)
         try:
             self.config.read(ini_file)
         except:
@@ -81,7 +83,7 @@ class Pylips:
                     return print("IP", self.config["TV"]["host"], "seems to be offline. Exiting...")
 
         # load API commands
-        with open("available_commands.json") as json_file:  
+        with open(os.path.dirname(os.path.realpath(__file__))+"/available_commands.json") as json_file:  
             self.available_commands = json.load(json_file)
 
         # start MQTT listener and updater if required
@@ -426,4 +428,4 @@ class Pylips:
             time.sleep(int(self.config["DEFAULT"]["update_interval"]))
 
 if __name__ == '__main__':
-    pylips = Pylips("settings.ini")
+    pylips = Pylips(os.path.dirname(os.path.realpath(__file__))+"/settings.ini")
