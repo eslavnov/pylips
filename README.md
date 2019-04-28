@@ -273,6 +273,10 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 ## Change log
 
+### 1.0.2 - 2019-04-27
+**Changed**
+- Relative paths => absolute paths so it plays nice with tools like crontab
+
 ### 1.0.1 - 2019-04-25
 **Changed**
 - Fixed a bug in pairing (Android TVs)
