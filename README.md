@@ -230,25 +230,30 @@ Pylips can connect to your MQTT broker to listen for commands and to publish TV 
 
 Edit the `settings.ini` according to your config and simply run `python pylips.py` without any arguments to run in MQTT mode.
 
-Enabling `MQTT_listen` in `settings.ini` will allow you to send commands to a topic specified in `topic_pylips` by posting a JSON message. This works pretty much the same as sending manual commands: your arguments become keys and their values - values of these keys. See examples:
+Enabling `MQTT_listen` in `settings.ini` will allow you to send commands to a topic specified in `topic_pylips` by posting a JSON message. This works pretty much the same as sending manual commands: your arguments become keys and their values - values of these keys. You can send any commands (POST, GET and built-in), but you won't get anything in return since you are just publishing a message over MQTT. Useful for POST commands that change the state of your TV, but for general GET requests you are better off using the manual mode.
+
+See examples:
 
 ```
-# built-in commands
+# Let's say we want to change the brightness of ambilight to max (10):
 
-#Manual mode: 
-python pylips.py --command ambihue_on
+# BUILT-IN COMMANDS
+
+# Manual mode: 
+python pylips.py --command ambilight_brightness --body '{"value":10}'
 
 # MQTT mode: 
-{ "command": "ambihue_on" }  
-```
-```
-# general post request
+{"command":"ambilight_brightness", "body":{"value":10} 
 
-#Manual mode: 
-python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command post --path menuitems/settings/current --body '{"nodes":[{"nodeid":2131230774}]}
 
-# MQTT mode:
-{ "command": "post", "path": "menuitems/settings/current", "body": {"nodes":[{"nodeid":2131230774}]} }
+# POST REQUESTS
+
+# Manual mode: 
+python pylips.py --command post --path 'menuitems/settings/update' --body '{"values":[{"value":{"Nodeid":2131230769,"Controllable":"true", "Available":"true", "string_id":"Brightness", "data":{"value":10}}}]}'
+
+# MQTT mode: 
+{"command":"post", "path": "menuitems/settings/update", "body": {"values":[{"value":{"Nodeid":2131230769,"Controllable":"true", "Available":"true","string_id":"Brightness", "data":{"value":10}}}]}}
+ 
 ```
 
 Enabling `MQTT_update` in `settings.ini` will publish status updates to `topic_status` like these:
@@ -272,6 +277,10 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 [The API reference](https://github.com/eslavnov/Pylips/wiki).
 
 ## Change log
+
+### 1.0.3 - 2019-04-28
+**Fixed**
+- Fixed a bug that broke some POST requests
 
 ### 1.0.2 - 2019-04-27
 **Changed**
