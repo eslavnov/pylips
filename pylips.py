@@ -36,7 +36,6 @@ class Pylips:
     def __init__(self, ini_file):
         # read config file
         self.config = configparser.ConfigParser()
-        print(os.path.dirname(os.path.realpath(__file__))+"/"+ini_file)
         try:
             self.config.read(ini_file)
         except:
@@ -254,6 +253,8 @@ class Pylips:
     # sends a general POST request
     def post(self, path, body, verbose=True, callback=True, err_count=0):
         while err_count < int(self.config["DEFAULT"]["num_retries"]):
+            if type(body) is str:
+                body = json.loads(body)
             if verbose:
                 print("Sending POST request to", str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path)) 
             try:
@@ -273,8 +274,9 @@ class Pylips:
                 print(json.dumps({"response":"OK"}))
                 return json.dumps({"response":"OK"})
         else:
-            if self.config["DEFAULT"]["mqtt_listen"].lower()=="true":
+            if self.config["DEFAULT"]["mqtt_listen"].lower()=="true" and len(sys.argv)==1:
                 self.mqtt_update_status({"powerstate":"Off", "volume":None, "muted":False, "cur_app":None, "ambilight":None, "ambihue":False})
+            print(json.dumps({"error":"Can not reach the API"}))
             return json.dumps({"error":"Can not reach the API"})
 
     # runs a command
@@ -287,7 +289,7 @@ class Pylips:
             if "body" in self.available_commands["post"][command] and body is not None:
                 new_body = self.available_commands["post"][command]["body"]
                 if command == "ambilight_brightness":
-                    new_body["values"][0]["value"]["data"] = body
+                    new_body["values"][0]["value"]["data"] = json.loads(body)
                 elif command == "ambilight_color":
                     new_body["colorSettings"]["color"]["hue"] = int(body["hue"]*(255/360))
                     new_body["colorSettings"]["color"]["saturation"]=int(body["saturation"]*(255/100))
