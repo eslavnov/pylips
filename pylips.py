@@ -1,4 +1,4 @@
-# version 1.0.2
+# version 1.0.4
 import platform    
 import subprocess
 import configparser
@@ -322,11 +322,11 @@ class Pylips:
                     if "path" in message:
                         path = message["path"]
                     if message["command"] == "get":
-                        if len(path)>0:
+                        if len(path)==0:
                             return print("Please provide a 'path' argument")
                         self.get(path,self.verbose)
                     elif message["command"] == "post":
-                        if len(path)>0:
+                        if len(path)==0:
                             return print("Please provide a 'path' argument")
                         self.post(path, body, self.verbose)
                     elif message["command"] != "post" and message["command"] != "get":

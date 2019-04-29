@@ -278,6 +278,10 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 ## Change log
 
+### 1.0.4 - 2019-04-29
+**Fixed**
+- Fixed a broken check for `path` and `body` arguments in MQTT mode
+
 ### 1.0.3 - 2019-04-28
 **Fixed**
 - Fixed a bug that broke some POST requests
