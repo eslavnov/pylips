@@ -332,7 +332,6 @@ class Pylips:
                             return print("Please provide a 'path' argument")
                         self.post(path, body, self.verbose)
                     elif message["command"] != "post" and message["command"] != "get":
-                        print(message["command"], body)
                         self.run_command(message["command"],body, self.verbose)
 
         self.mqtt = mqttc.Client()
