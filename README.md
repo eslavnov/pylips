@@ -29,10 +29,10 @@ The current version of the API does not allow switching input sources anymore (?
 Provided that you have python (version 3+) on your system, install all the dependencies first:
 
 ```
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
-You may have to use `pip3` and `python3` instead of `pip` and `python` depending on how these tools are installed on your system.
+You may have to use `pip` and `python` instead of `pip3` and `python3` depending on how these tools are installed on your system.
 
 ## Setting up Pylips
 
@@ -65,7 +65,7 @@ topic_status =          # Pylips will send status updates to this topic
 
 Now turn your TV on and run Pylips without any arguments to complete setting it up (it will discover your TV's API version, port and protocol + pair and save the credentials if required):
 
-`python pylips.py`
+`python3 pylips.py`
 
 Once it's done, you are ready to use Pylips!
 
@@ -82,7 +82,7 @@ You can take advantage of some of the built-in commands or send your own custom 
 
 ### Built-in commands ###
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command %command%
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command %command%
 ```
 
 Any passed arguments will override the settings in `settings.ini` without overwriting them. If you have already run the discovery for new users, you don't have to specify `--host`, `--user` and `-pass` parameters. Also skip the `--user` and `--pass` parameters if your TV does not have Android. Add `--verbose False` to any command if you don't want to see the feedback in your terminal (useful for command line sensors). 
@@ -184,22 +184,22 @@ Any passed arguments will override the settings in `settings.ini` without overwr
 
 Send Stop key:
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command stop
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command stop
 ```
 
 Turn Ambilight on:
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command ambilight_on
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command ambilight_on
 ```
 
 Launch YouTube:
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command launch_app --body '{"id":"com.google.android.apps.youtube.tv.activity.ShellActivity-com.google.android.youtube.tv","order":0,"intent":{"action":"Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 pkg=com.google.android.youtube.tv cmp=com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.ShellActivity }","component":{"packageName":"com.google.android.youtube.tv","className":"com.google.android.apps.youtube.tv.activity.ShellActivity"}},"label":"YouTube"}'
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command launch_app --body '{"id":"com.google.android.apps.youtube.tv.activity.ShellActivity-com.google.android.youtube.tv","order":0,"intent":{"action":"Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 pkg=com.google.android.youtube.tv cmp=com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.ShellActivity }","component":{"packageName":"com.google.android.youtube.tv","className":"com.google.android.apps.youtube.tv.activity.ShellActivity"}},"label":"YouTube"}'
 ```
 
 Launch Netflix:
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command launch_app --body '{"label":"Netflix","intent":{"component":{"packageName":"com.netflix.ninja","className":"com.netflix.ninja.MainActivity"},"action":"Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 pkg=com.netflix.ninja cmp=com.netflix.ninja/.MainActivity }"},"order":0,"id":"com.netflix.ninja.MainActivity-com.netflix.ninja","type":"app"}'
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command launch_app --body '{"label":"Netflix","intent":{"component":{"packageName":"com.netflix.ninja","className":"com.netflix.ninja.MainActivity"},"action":"Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 pkg=com.netflix.ninja cmp=com.netflix.ninja/.MainActivity }"},"order":0,"id":"com.netflix.ninja.MainActivity-com.netflix.ninja","type":"app"}'
 ```
 
 ### Custom commands ###
@@ -215,7 +215,7 @@ Read the API reference first to understand available endpoints and how to use th
 To use the `get` method you need to provide a path to the required endpoint with a `--path` argument. For example, this will send a get request to the `system` endpoint (https://yourIP:1926/6/system):
 
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command get --path system
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command get --path system
 ```
 
 **Post method:**
@@ -223,12 +223,12 @@ python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --
 To use the `post` method you need to provide a path to the required endpoint with a `--path` argument and the body of your POST request with a `--body` argument. For example, this will send a post request to the `menuitems/settings/current` endpoint with a body that will get back the status of 'Ambilight + Hue' (notice that the `--body` argument **needs to come inside the quotes**):
 
 ```
-python pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command post --path menuitems/settings/current --body '{"nodes":[{"nodeid":2131230774}]}'
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command post --path menuitems/settings/current --body '{"nodes":[{"nodeid":2131230774}]}'
 ```
 ## Controlling the TV (MQTT mode) ##
 Pylips can connect to your MQTT broker to listen for commands and to publish TV status updates.
 
-Edit the `settings.ini` according to your config and simply run `python pylips.py` without any arguments to run in MQTT mode.
+Edit the `settings.ini` according to your config and simply run `python3 pylips.py` without any arguments to run in MQTT mode.
 
 Enabling `MQTT_listen` in `settings.ini` will allow you to send commands to a topic specified in `topic_pylips` by posting a JSON message. This works pretty much the same as sending manual commands: your arguments become keys and their values - values of these keys. You can send any commands (POST, GET and built-in), but you won't get anything in return since you are just publishing a message over MQTT. Useful for POST commands that change the state of your TV, but for general GET requests you are better off using the manual mode.
 
@@ -240,7 +240,7 @@ See examples:
 # BUILT-IN COMMANDS
 
 # Manual mode: 
-python pylips.py --command ambilight_brightness --body '{"value":10}'
+python3 pylips.py --command ambilight_brightness --body '{"value":10}'
 
 # MQTT mode: 
 {"command":"ambilight_brightness", "body":{"value":10} 
@@ -249,7 +249,7 @@ python pylips.py --command ambilight_brightness --body '{"value":10}'
 # POST REQUESTS
 
 # Manual mode: 
-python pylips.py --command post --path 'menuitems/settings/update' --body '{"values":[{"value":{"Nodeid":2131230769,"Controllable":"true", "Available":"true", "string_id":"Brightness", "data":{"value":10}}}]}'
+python3 pylips.py --command post --path 'menuitems/settings/update' --body '{"values":[{"value":{"Nodeid":2131230769,"Controllable":"true", "Available":"true", "string_id":"Brightness", "data":{"value":10}}}]}'
 
 # MQTT mode: 
 {"command":"post", "path": "menuitems/settings/update", "body": {"values":[{"value":{"Nodeid":2131230769,"Controllable":"true", "Available":"true","string_id":"Brightness", "data":{"value":10}}}]}}
@@ -277,6 +277,10 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 [The API reference](https://github.com/eslavnov/Pylips/wiki).
 
 ## Change log
+
+### 1.0.5 - 2019-05-05
+**Fixed**
+- Fixed `launch_app` command
 
 ### 1.0.4 - 2019-04-29
 **Fixed**

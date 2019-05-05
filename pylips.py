@@ -1,4 +1,4 @@
-# version 1.0.4
+# version 1.0.5
 import platform    
 import subprocess
 import configparser
@@ -289,12 +289,14 @@ class Pylips:
             if "body" in self.available_commands["post"][command] and body is not None:
                 new_body = self.available_commands["post"][command]["body"]
                 if command == "ambilight_brightness":
-                    new_body["values"][0]["value"]["data"] = json.loads(body)
+                    new_body["values"][0]["value"]["data"] = json.loads(json.dumps(body))
                 elif command == "ambilight_color":
                     new_body["colorSettings"]["color"]["hue"] = int(body["hue"]*(255/360))
                     new_body["colorSettings"]["color"]["saturation"]=int(body["saturation"]*(255/100))
                     new_body["colorSettings"]["color"]["brightness"]=int(body["brightness"])
                 return self.post(self.available_commands["post"][command]["path"],new_body,verbose, callback)
+            else:
+                return self.post(self.available_commands["post"][command]["path"], body,verbose, callback)
         else:
             print("Unknown command")
 
