@@ -296,7 +296,6 @@ class Pylips:
                     new_body["colorSettings"]["color"]["brightness"]=int(body["brightness"])
                 return self.post(self.available_commands["post"][command]["path"],new_body,verbose, callback)
             else:
-                print('Running post 3')
                 return self.post(self.available_commands["post"][command]["path"], body,verbose, callback)
         else:
             print("Unknown command")
