@@ -289,7 +289,7 @@ class Pylips:
             if "body" in self.available_commands["post"][command] and body is not None:
                 new_body = self.available_commands["post"][command]["body"]
                 if command == "ambilight_brightness":
-                    new_body["values"][0]["value"]["data"] = json.loads(json.dumps(body))
+                    new_body["values"][0]["value"]["data"] = json.loads(body)
                 elif command == "ambilight_color":
                     new_body["colorSettings"]["color"]["hue"] = int(body["hue"]*(255/360))
                     new_body["colorSettings"]["color"]["saturation"]=int(body["saturation"]*(255/100))
