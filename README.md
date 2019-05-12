@@ -278,6 +278,10 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 ## Change log
 
+### 1.0.6 - 2019-05-12
+**Fixed**
+- Fixed `ambilight_brightness` command (manual mode)
+
 ### 1.0.5 - 2019-05-05
 **Fixed**
 - Fixed `launch_app` command
