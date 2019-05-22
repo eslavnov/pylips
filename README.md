@@ -278,6 +278,10 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 ## Change log
 
+### 1.0.7 - 2019-05-22
+**Fixed**
+- Got my hands on some non-android TVs, fixed some small bugs in pairing/sending commands
+
 ### 1.0.6 - 2019-05-12
 **Fixed**
 - Fixed `ambilight_brightness` command (manual mode)
