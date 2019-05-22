@@ -57,7 +57,7 @@ class Pylips:
                 self.config["TV"]["pass"] = args.password
                 self.config["TV"]["port"] = "1926"
                 self.config["TV"]["protocol"] = "https://"
-            elif len(self.config["TV"]["user"])==0 or len(self.config["TV"]["pass"])==0:
+            elif (len(self.config["TV"]["user"])==0 or len(self.config["TV"]["pass"])==0) and self.config["TV"]["port"] == 1926:
                 return print ("If you have an Android TV, please provide both a username and a password (--user and --pass)")
             if len(args.apiv) != 0:
                 self.config["TV"]["apiv"]=args.apiv
@@ -73,8 +73,8 @@ class Pylips:
                 if self.check_if_paired() is False:
                     print("No valid credentials found, starting pairing process...")
                     self.pair()
-                    with open("settings.ini", "w") as configfile:
-                        self.config.write(configfile)
+                with open("settings.ini", "w") as configfile:
+                    self.config.write(configfile)
             else:
                 if self.is_online(self.config["TV"]["host"]):
                     return print("IP", self.config["TV"]["host"], "is online, but no known API is found. Exiting...")
@@ -138,6 +138,8 @@ class Pylips:
                     print("Connection refused")
                     continue
                 if r.status_code == 200:
+                    print(r.json())
+
                     self.config["TV"]["apiv"]= str(r.json()["api_version"]["Major"])
                     if "featuring" in r.json() and "systemfeatures" in r.json()["featuring"] and "pairing_type" in r.json()["featuring"]["systemfeatures"] and r.json()["featuring"]["systemfeatures"]["pairing_type"] == "digest_auth_pairing":
                         self.config["TV"]["protocol"] = "https://"
