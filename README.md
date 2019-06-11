@@ -58,7 +58,8 @@ host =                  # your MQTT broker's ip address
 port =                  # your MQTT broker's port
 user =                  # your MQTT username
 pass =                  # your MQTT password
-TLS = False             # use TLS        
+TLS = False             # use TLS  
+cert_path =             # full path to your custom certificate if you are using one, otherwise leave it blank            
 topic_pylips =          # Pylips will listen for commands to this topic
 topic_status =          # Pylips will send status updates to this topic
 ```
@@ -202,6 +203,16 @@ Launch Netflix:
 python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command launch_app --body '{"label":"Netflix","intent":{"component":{"packageName":"com.netflix.ninja","className":"com.netflix.ninja.MainActivity"},"action":"Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 pkg=com.netflix.ninja cmp=com.netflix.ninja/.MainActivity }"},"order":0,"id":"com.netflix.ninja.MainActivity-com.netflix.ninja","type":"app"}'
 ```
 
+Launch Amazon Prime Video:
+```
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command launch_app --body '{"id":"com.amazon.amazonvideo.livingroom","order":0,"intent":{"action":"Intent{act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 pkg=com.amazon.amazonvideo.livingroom }","component":{"packageName":"com.amazon.amazonvideo.livingroom","className":"com.amazon.ignition.IgnitionActivity"}},"label":"Prime Video"}'
+```
+
+Launch Kodi:
+```
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command launch_app --body '{"id":"org.xbmc.kodi","order":0,"intent":{"action":"Intent{act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 pkg=org.xbmc.kodi }","component":{"packageName":"org.xbmc.kodi","className":"org.xbmc.kodi.Splash"}},"label":"Kodi"}'
+```
+
 ### Custom commands ###
 The tools exposes two general commands to talk to the TV's API: `get` (sends GET request and *gets* back some data like ambilight mode) and `post` (sends POST request that *posts* some data and changes something in the TV - like turning the ambilight off). You can also add custom commands to `available_commands.json`.
 
@@ -277,6 +288,13 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 [The API reference](https://github.com/eslavnov/Pylips/wiki).
 
 ## Change log
+
+### 1.0.8 - 2019-06-11
+**Fixed**
+- Fixed an edge case when a combination of certain parameters broke the tool (`MQTT_listen = True` + `MQTT_update = False`)
+
+**Added**
+- Add support for custom certificates (MQTT mode)
 
 ### 1.0.7 - 2019-05-22
 **Fixed**
