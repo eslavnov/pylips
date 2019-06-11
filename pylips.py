@@ -1,4 +1,4 @@
-# version 1.0.7
+# version 1.0.8
 import platform    
 import subprocess
 import configparser
@@ -36,6 +36,7 @@ class Pylips:
     def __init__(self, ini_file):
         # read config file
         self.config = configparser.ConfigParser()
+        
         try:
             self.config.read(ini_file)
         except:
@@ -110,7 +111,10 @@ class Pylips:
                 print("Please provide a valid command with a '--command' argument")
         else:
             print("Please enable mqtt_listen in settings.ini or provide a valid command with a '--command' argument")
-
+        if self.config["DEFAULT"]["mqtt_listen"] == "True" and self.config["DEFAULT"]["mqtt_update"] == "False":
+           while True:
+               pass
+               
     def is_online(self, host):
         """
         Returns True if host (str) responds to a ping request.
@@ -186,6 +190,8 @@ class Pylips:
 
     # pairs with a TV
     def pair_request(self, data, err_count=0):
+        print(data)
+        print("https://" + str(self.config["TV"]["host"]) + ":1926/"+str(self.config["TV"]["apiv"])+"/pair/request")
         response={}
         r = requests.post("https://" + str(self.config["TV"]["host"]) + ":1926/"+str(self.config["TV"]["apiv"])+"/pair/request", json=data, verify=False, timeout=2)
         if r.json() is not None:
@@ -221,7 +227,10 @@ class Pylips:
             if err_count > 0:
                 print("Resending pair confirm request")
             try:
-                requests.post("https://" + str(self.config["TV"]["host"]) +":1926/"+str(self.config["TV"]["apiv"])+"/pair/grant", json=data, verify=False, auth=HTTPDigestAuth(self.config["TV"]["user"], self.config["TV"]["pass"]),timeout=2)
+                # print(data)
+                r = requests.post("https://" + str(self.config["TV"]["host"]) +":1926/"+str(self.config["TV"]["apiv"])+"/pair/grant", json=data, verify=False, auth=HTTPDigestAuth(self.config["TV"]["user"], self.config["TV"]["pass"]),timeout=2)
+                print (r.request.headers)
+                print (r.request.body)
                 print("Username for subsequent calls is: " + str(self.config["TV"]["user"]))
                 print("Password for subsequent calls is: " + str(self.config["TV"]["pass"]))
                 return print("The credentials are saved in the settings.ini file.")
@@ -343,7 +352,10 @@ class Pylips:
         if len(self.config["MQTT"]["user"])>0 and len(self.config["MQTT"]["pass"])>0:
             self.mqtt.username_pw_set(self.config["MQTT"]["user"], self.config["MQTT"]["pass"])
         if self.config["MQTT"]["TLS"].lower()=="true":
-            self.mqtt.tls_set()
+            if len(self.config["MQTT"]["cert_path"].strip())>0:
+                self.mqtt.tls_set(self.config["MQTT"]["cert_path"])
+            else:
+                self.mqtt.tls_set()
         self.mqtt.connect(str(self.config["MQTT"]["host"]), int(self.config["MQTT"]["port"]), 60)
         self.mqtt.loop_start()
 
