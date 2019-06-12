@@ -111,9 +111,6 @@ class Pylips:
                 print("Please provide a valid command with a '--command' argument")
         else:
             print("Please enable mqtt_listen in settings.ini or provide a valid command with a '--command' argument")
-        if self.config["DEFAULT"]["mqtt_listen"] == "True" and self.config["DEFAULT"]["mqtt_update"] == "False":
-           while True:
-               pass
                
     def is_online(self, host):
         """
@@ -300,8 +297,12 @@ class Pylips:
             if "body" in self.available_commands["post"][command] and body is not None:
                 new_body = self.available_commands["post"][command]["body"]
                 if command == "ambilight_brightness":
-                    new_body["values"][0]["value"]["data"] = json.loads(body)
+                    if type(body) is str:
+                        body = json.loads(body)
+                    new_body["values"][0]["value"]["data"] = body
                 elif command == "ambilight_color":
+                    if type(body) is str:
+                        body = json.loads(body)
                     new_body["colorSettings"]["color"]["hue"] = int(body["hue"]*(255/360))
                     new_body["colorSettings"]["color"]["saturation"]=int(body["saturation"]*(255/100))
                     new_body["colorSettings"]["color"]["brightness"]=int(body["brightness"])
@@ -357,7 +358,7 @@ class Pylips:
             else:
                 self.mqtt.tls_set()
         self.mqtt.connect(str(self.config["MQTT"]["host"]), int(self.config["MQTT"]["port"]), 60)
-        self.mqtt.loop_start()
+        self.mqtt.loop_forever()
 
     # publishes an update with TV status over MQTT
     def mqtt_update_status(self, update):
