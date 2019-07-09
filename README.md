@@ -9,6 +9,21 @@ Pylips is a Python tool to control Philips TVs (2015+) through their reverse-eng
 
 The current version of the API does not allow switching input sources anymore (?), use [this tool](https://github.com/eslavnov/android-tv-remote) instead (Android TVs only).
 
+### Supported models
+
+As stated by Philips, the following models support the Jointspace protocol.
+
+#### 2009 models
+7664H, 8xx4, 9xx4 - having software version >= 0.26.76.0.
+You might have to enable the Jointspace protocol as described in your manual.
+
+#### 2010 models
+7000-series and up - having software version >= 0.140.25.0.
+You might have to enable the Jointspace protocol as described in your manual.
+
+#### 2011 models and up
+All smart TV's from 2011 and up, no matter what software version, support the Jointspace protocol and have it enable as a factory default.
+
 ## Table of contents ##
 1. [Prerequisites](#prerequisites)
 1. [Setting up Pylips](#setting-up-pylips)
