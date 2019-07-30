@@ -289,6 +289,10 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 ## Change log
 
+### 1.0.9 - 2019-07-30
+**Fixed**
+- Fixed a bug in MQTT loop
+
 ### 1.0.8 - 2019-06-11
 **Fixed**
 - Fixed an edge case when a combination of certain parameters broke the tool (`MQTT_listen = True` + `MQTT_update = False`)
