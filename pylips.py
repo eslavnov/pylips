@@ -1,4 +1,4 @@
-# version 1.0.8
+# version 1.0.9
 import platform    
 import subprocess
 import configparser
@@ -358,7 +358,10 @@ class Pylips:
             else:
                 self.mqtt.tls_set()
         self.mqtt.connect(str(self.config["MQTT"]["host"]), int(self.config["MQTT"]["port"]), 60)
-        self.mqtt.loop_forever()
+        if self.config["DEFAULT"]["mqtt_listen"] == "True" and self.config["DEFAULT"]["mqtt_update"] == "False":
+            self.mqtt.loop_forever()
+        else:
+            self.mqtt.loop_start()
 
     # publishes an update with TV status over MQTT
     def mqtt_update_status(self, update):
