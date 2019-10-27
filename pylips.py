@@ -1,4 +1,4 @@
-# version 1.0.9
+# version 1.0.10
 import platform    
 import subprocess
 import configparser
@@ -373,7 +373,7 @@ class Pylips:
     # updates powerstate for MQTT status and returns True if TV is on
     def mqtt_update_powerstate(self):
         powerstate_status = self.get("powerstate",self.verbose)
-        if powerstate_status is not None:
+        if powerstate_status is not None and powerstate_status[0]=='{':
             powerstate_status = json.loads(powerstate_status)
             if "powerstate" in powerstate_status:
                 if "powerstate" in self.last_status and self.last_status["powerstate"] != powerstate_status['powerstate']:
@@ -389,7 +389,7 @@ class Pylips:
     # updates ambilight for MQTT status
     def mqtt_update_ambilight(self):
         ambilight_status = self.get("ambilight/currentconfiguration",self.verbose)
-        if ambilight_status is not None:
+        if ambilight_status is not None and ambilight_status[0]=='{':
             ambilight_status = json.loads(ambilight_status)
             if "styleName" in ambilight_status:
                 ambilight = ambilight_status
@@ -399,7 +399,7 @@ class Pylips:
     # updates ambihue for MQTT status
     def mqtt_update_ambihue(self):
         ambihue_status = self.run_command("ambihue_status",None,self.verbose, False)
-        if ambihue_status is not None:
+        if ambihue_status is not None and ambihue_status[0]=='{':
             ambihue_status = json.loads(ambihue_status)
             if "values" in ambihue_status:
                 ambihue = ambihue_status["values"][0]["value"]["data"]["value"]
@@ -409,7 +409,7 @@ class Pylips:
     # updates current app for MQTT status
     def mqtt_update_app(self):
         actv_status = self.run_command("current_app",None,self.verbose, False)
-        if actv_status is not None:
+        if actv_status is not None and actv_status[0]=='{':
             actv_status=json.loads(actv_status)
             if "component" in actv_status:
                 if actv_status["component"]["packageName"] == "org.droidtv.zapster" or actv_status["component"]["packageName"] =="NA":
@@ -421,7 +421,7 @@ class Pylips:
     # updates current channel for MQTT status
     def mqtt_update_channel(self):
         channel = self.run_command("current_channel",None,self.verbose, False)
-        if channel is not None:
+        if channel is not None and channel[0]=='{':
             channel=json.loads(channel)
             if "channel" in channel:
                 if json.dumps(self.last_status["cur_app"]) != json.dumps({"app":"TV","channel":channel}):
