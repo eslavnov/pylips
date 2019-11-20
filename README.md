@@ -289,7 +289,7 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 ## Change log
 
-### 1.0.10 - 2019-07-30
+### 1.0.10 - 2019-10-27
 **Changed**
 - Improved response handling in MQTT
 
