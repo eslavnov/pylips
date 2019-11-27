@@ -74,6 +74,12 @@ Once it's done, you are ready to use Pylips!
 
 To pair with the Android TVs we need to create a HMAC signature using an 88-character (?) key. As far as I can tell the key is used for pairing only. With that in mind and to make this tool as user-friendly as possible, the key is hardcoded. I see no security issues with this but if you are extremely paranoid you can change it: look for a `secret_key` in the beginning of the code.
 
+**Custom config path:**
+
+You can load a custom config by specifying its **absolute** path with a `--config` parameter:
+
+`python pylips.py --config '/home/eslavnov/repos/Pylips/some_settings.ini'`
+
 ### Migrating from older versions ###
 
 The new version of Pylips is 100% backwards-compatible with the old arguments and commands, so you don't have to change anything to keep using it, but every call will take slightly longer to identify the API version. Follow the instructions for the new users to save your API version in `settings.ini`, then it will run faster. If you want to override the API version check you can also use the `--apiv` parameter (manual mode only). Finally, you still need to follow the instructions for the new users to take advantage of MQTT. 
@@ -288,6 +294,10 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 [The API reference](https://github.com/eslavnov/Pylips/wiki).
 
 ## Change log
+
+### 1.0.11 - 2019-11-27
+**Added**
+- Custom settings file support
 
 ### 1.0.10 - 2019-10-27
 **Changed**

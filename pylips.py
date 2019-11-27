@@ -1,4 +1,4 @@
-# version 1.0.10
+# version 1.0.11
 import platform    
 import subprocess
 import configparser
@@ -30,17 +30,22 @@ parser.add_argument("--path", dest="path", help="API's endpoint path")
 parser.add_argument("--body", dest="body", help="Body for post requests")
 parser.add_argument("--verbose", dest="verbose", help="Display feedback", default="1")
 parser.add_argument("--apiv", dest="apiv", help="Api version", default="")
+parser.add_argument("--config", dest="config", help="Path to config file", default=os.path.dirname(os.path.realpath(__file__))+"/settings.ini")
+
 args = parser.parse_args()
 
 class Pylips:
     def __init__(self, ini_file):
         # read config file
         self.config = configparser.ConfigParser()
-        
+
+        if os.path.isfile(ini_file) == False:
+            return print("Config file", ini_file, "not found")
+
         try:
             self.config.read(ini_file)
         except:
-            return print("Config file", ini_file, "not found")
+            return print("Config file", ini_file, "found, but cannot be read")
 
         if args.host is None and self.config["TV"]["host"]=="":
             return print("Please set your TV's IP-address with a --host parameter or in [TV] section in settings.ini")
@@ -87,7 +92,8 @@ class Pylips:
             self.available_commands = json.load(json_file)
 
         # start MQTT listener and updater if required
-        if len(sys.argv)==1 and self.config["DEFAULT"]["mqtt_listen"] == "True":
+        print('!!!!', sys.argv)
+        if (len(sys.argv)==1 or (len(sys.argv)==3 and sys.argv[1] == "--config")) and self.config["DEFAULT"]["mqtt_listen"] == "True":
                 if len(self.config["MQTT"]["host"])>0:
                     # listen for MQTT messages to run commands
                     self.start_mqtt_listener()
@@ -450,4 +456,4 @@ class Pylips:
             time.sleep(int(self.config["DEFAULT"]["update_interval"]))
 
 if __name__ == '__main__':
-    pylips = Pylips(os.path.dirname(os.path.realpath(__file__))+"/settings.ini")
+    pylips = Pylips(args.config)
