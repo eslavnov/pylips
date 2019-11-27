@@ -295,7 +295,7 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 ## Change log
 
-### 1.0.10 - 2019-11-27
+### 1.0.11 - 2019-11-27
 **Added**
 - Custom settings file support
 
