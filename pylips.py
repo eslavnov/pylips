@@ -17,6 +17,9 @@ import os
 
 # Suppress "Unverified HTTPS request is being made" error message
 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
+session = requests.Session()
+session.verify = False
+session.mount('https://', requests.adapters.HTTPAdapter(pool_connections=1))
 
 # Key used for generated the HMAC signature
 secret_key="JCqdN5AcnAHgJYseUn7ER5k3qgtemfUvMRghQpTfTZq7Cvv8EPQPqfz6dDxPQPSu4gKFPWkJGw32zyASgJkHwCjU"
@@ -30,12 +33,13 @@ parser.add_argument("--path", dest="path", help="API's endpoint path")
 parser.add_argument("--body", dest="body", help="Body for post requests")
 parser.add_argument("--verbose", dest="verbose", help="Display feedback", default="1")
 parser.add_argument("--apiv", dest="apiv", help="Api version", default="")
-parser.add_argument("--config", dest="config", help="Path to config file", default=os.path.dirname(os.path.realpath(__file__))+"/settings.ini")
+parser.add_argument("--config", dest="config", help="Path to config file", default=os.path.dirname(os.path.realpath(__file__))+os.path.sep+"settings.ini")
 
 args = parser.parse_args()
 
 class Pylips:
     def __init__(self, ini_file):
+        print(args.config)
         # read config file
         self.config = configparser.ConfigParser()
 
@@ -92,7 +96,6 @@ class Pylips:
             self.available_commands = json.load(json_file)
 
         # start MQTT listener and updater if required
-        print('!!!!', sys.argv)
         if (len(sys.argv)==1 or (len(sys.argv)==3 and sys.argv[1] == "--config")) and self.config["DEFAULT"]["mqtt_listen"] == "True":
                 if len(self.config["MQTT"]["host"])>0:
                     # listen for MQTT messages to run commands
@@ -140,7 +143,7 @@ class Pylips:
                 try:
                     if verbose:
                         print("Trying", str(protocol) + str(self.config["TV"]["host"]) + ":" + str(port)+"/" + str(api_version)+"/system")
-                    r = requests.get(str(protocol) + str(self.config["TV"]["host"]) + ":" + str(port)+"/" + str(api_version)+"/system", verify=False, timeout=2)
+                    r = session.get(str(protocol) + str(self.config["TV"]["host"]) + ":" + str(port)+"/" + str(api_version)+"/system", verify=False, timeout=2)
                 except requests.exceptions.ConnectionError:
                     print("Connection refused")
                     continue
@@ -196,7 +199,7 @@ class Pylips:
         print(data)
         print("https://" + str(self.config["TV"]["host"]) + ":1926/"+str(self.config["TV"]["apiv"])+"/pair/request")
         response={}
-        r = requests.post("https://" + str(self.config["TV"]["host"]) + ":1926/"+str(self.config["TV"]["apiv"])+"/pair/request", json=data, verify=False, timeout=2)
+        r = session.post("https://" + str(self.config["TV"]["host"]) + ":1926/"+str(self.config["TV"]["apiv"])+"/pair/request", json=data, verify=False, timeout=2)
         if r.json() is not None:
             if r.json()["error_id"] == "SUCCESS":
                 response=r.json()
@@ -231,7 +234,7 @@ class Pylips:
                 print("Resending pair confirm request")
             try:
                 # print(data)
-                r = requests.post("https://" + str(self.config["TV"]["host"]) +":1926/"+str(self.config["TV"]["apiv"])+"/pair/grant", json=data, verify=False, auth=HTTPDigestAuth(self.config["TV"]["user"], self.config["TV"]["pass"]),timeout=2)
+                r = session.post("https://" + str(self.config["TV"]["host"]) +":1926/"+str(self.config["TV"]["apiv"])+"/pair/grant", json=data, verify=False, auth=HTTPDigestAuth(self.config["TV"]["user"], self.config["TV"]["pass"]),timeout=2)
                 print (r.request.headers)
                 print (r.request.body)
                 print("Username for subsequent calls is: " + str(self.config["TV"]["user"]))
@@ -250,7 +253,7 @@ class Pylips:
             if verbose:
                 print("Sending GET request to", str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path))
             try:
-                r = requests.get(str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path), verify=False, auth=HTTPDigestAuth(str(self.config["TV"]["user"]), str(self.config["TV"]["pass"])), timeout=2)
+                r = session.get(str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path), verify=False, auth=HTTPDigestAuth(str(self.config["TV"]["user"]), str(self.config["TV"]["pass"])), timeout=2)
             except Exception:
                 err_count += 1
                 continue
@@ -271,8 +274,8 @@ class Pylips:
                 body = json.loads(body)
             if verbose:
                 print("Sending POST request to", str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path)) 
-            try:
-                r = requests.post(str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path), json=body, verify=False, auth=HTTPDigestAuth(str(self.config["TV"]["user"]), str(self.config["TV"]["pass"])), timeout=2)
+            # try:
+            r = session.post(str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path), json=body, verify=False, auth=HTTPDigestAuth(str(self.config["TV"]["user"]), str(self.config["TV"]["pass"])), timeout=2)
             except Exception:
                 err_count += 1
                 continue
