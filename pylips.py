@@ -274,8 +274,8 @@ class Pylips:
                 body = json.loads(body)
             if verbose:
                 print("Sending POST request to", str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path)) 
-            # try:
-            r = session.post(str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path), json=body, verify=False, auth=HTTPDigestAuth(str(self.config["TV"]["user"]), str(self.config["TV"]["pass"])), timeout=2)
+            try:
+                r = session.post(str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path), json=body, verify=False, auth=HTTPDigestAuth(str(self.config["TV"]["user"]), str(self.config["TV"]["pass"])), timeout=2)
             except Exception:
                 err_count += 1
                 continue

@@ -295,6 +295,17 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 ## Change log
 
+### 1.1.0 - 2020-01-11
+**Added**
+- TV switch on (?)
+
+**Fixed**
+- Paths issue when running outside Pylips folder on Windows systems
+
+**Changed**
+- SSL session is now being reused to help with API stoping to respond
+- Pycryptodome instead of the outdated pycrypto dependency
+
 ### 1.0.11 - 2019-11-27
 **Added**
 - Custom settings file support
