@@ -186,6 +186,8 @@ Any passed arguments will override the settings in `settings.ini` without overwr
 
    **Other:**
 1. `launch_app` - Launches an app (Android TVs only). Requires a valid `--body` argument. See [API reference](https://github.com/eslavnov/pylips/wiki/Applications-(GET)) to get a list of installed apps, find your app in this list and use it as a `--body` argument.
+1. `power_on` - Turns on the TV even if it's in a deep sleep mode. You might need to run `allow_power_on` first, although it was not needed for me.
+1. `allow_power_on` - Allows to remotely power on the TV via chromecast requests.
 
 **Examples of using the built-in commands:**
 
@@ -237,11 +239,18 @@ python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% -
 
 **Post method:**
 
-To use the `post` method you need to provide a path to the required endpoint with a `--path` argument and the body of your POST request with a `--body` argument. For example, this will send a post request to the `menuitems/settings/current` endpoint with a body that will get back the status of 'Ambilight + Hue' (notice that the `--body` argument **needs to come inside the quotes**):
+To use the `post` method you need to provide a path to the required endpoint with a `--path` argument and the body of your POST request with a `--body` argument. For example, this will send a post request to the `menuitems/settings/current` endpoint with a body that will get back the status of 'Ambilight + Hue' (notice that the `--body` argument **needs to come inside the quotes for UNIX systems**):
 
 ```
 python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command post --path menuitems/settings/current --body '{"nodes":[{"nodeid":2131230774}]}'
 ```
+
+**For Windows systems**:
+
+```
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command post --path menuitems/settings/current --body ^"{^"^"nodes^"^":[{^"^"nodeid^"^":2131230774}]}^"
+```
+
 ## Controlling the TV (MQTT mode) ##
 Pylips can connect to your MQTT broker to listen for commands and to publish TV status updates.
 
@@ -294,6 +303,17 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 [The API reference](https://github.com/eslavnov/Pylips/wiki).
 
 ## Change log
+
+### 1.1.0 - 2020-01-12
+**Added**
+- Remote `power_on` command that works even from sleep mode. Should work for all Android TVs, not sure about other models. Thx [@neophob](https://github.com/neophob)!
+
+**Fixed**
+- Paths issue when running outside Pylips folder on Windows systems
+
+**Changed**
+- SSL session is now being reused to help with API stoping to respond
+- Pycryptodome instead of the outdated pycrypto dependency
 
 ### 1.0.11 - 2019-11-27
 **Added**
