@@ -39,7 +39,6 @@ args = parser.parse_args()
 
 class Pylips:
     def __init__(self, ini_file):
-        print(args.config)
         # read config file
         self.config = configparser.ConfigParser()
 
