@@ -190,7 +190,6 @@ Any passed arguments will override the settings in `settings.ini` without overwr
 1. `block_power_on` - Blocks the ability to remotely power on the TV.
 1. `power_on` - Turns on the TV even if it's in a deep sleep mode.
 
-
 **Examples of using the built-in commands:**
 
 Send Stop key:
@@ -241,11 +240,18 @@ python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% -
 
 **Post method:**
 
-To use the `post` method you need to provide a path to the required endpoint with a `--path` argument and the body of your POST request with a `--body` argument. For example, this will send a post request to the `menuitems/settings/current` endpoint with a body that will get back the status of 'Ambilight + Hue' (notice that the `--body` argument **needs to come inside the quotes**):
+To use the `post` method you need to provide a path to the required endpoint with a `--path` argument and the body of your POST request with a `--body` argument. For example, this will send a post request to the `menuitems/settings/current` endpoint with a body that will get back the status of 'Ambilight + Hue' (notice that the `--body` argument **needs to come inside the quotes for UNIX systems**):
 
 ```
 python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command post --path menuitems/settings/current --body '{"nodes":[{"nodeid":2131230774}]}'
 ```
+
+**For Windows systems**:
+
+```
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command post --path menuitems/settings/current --body ^"{^"^"nodes^"^":[{^"^"nodeid^"^":2131230774}]}^"
+```
+
 ## Controlling the TV (MQTT mode) ##
 Pylips can connect to your MQTT broker to listen for commands and to publish TV status updates.
 
@@ -301,7 +307,7 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 ### 1.1.0 - 2020-01-12
 **Added**
-- Remote `power_on` command (thx @neophob) as well as commands to turn this feature on/off (`allow_power_on` and `block_power_on`). Should work for all Android TVs, not sure about other models
+- Remote `power_on` command  as well as commands to turn this feature on/off (`allow_power_on` and `block_power_on`). Should work for all Android TVs, not sure about other models. Thx [@neophob](https://github.com/neophob)!
 
 **Fixed**
 - Paths issue when running outside Pylips folder on Windows systems
