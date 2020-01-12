@@ -186,6 +186,10 @@ Any passed arguments will override the settings in `settings.ini` without overwr
 
    **Other:**
 1. `launch_app` - Launches an app (Android TVs only). Requires a valid `--body` argument. See [API reference](https://github.com/eslavnov/pylips/wiki/Applications-(GET)) to get a list of installed apps, find your app in this list and use it as a `--body` argument.
+1. `allow_power_on` - Allows to remotely power on the TV. Needs to be run once before using `power_on`.
+1. `block_power_on` - Blocks the ability to remotely power on the TV.
+1. `power_on` - Turns on the TV even if it's in a deep sleep mode.
+
 
 **Examples of using the built-in commands:**
 
@@ -295,9 +299,9 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 ## Change log
 
-### 1.1.0 - 2020-01-11
+### 1.1.0 - 2020-01-12
 **Added**
-- TV switch on (?)
+- Remote `power_on` command (thx @neophob) as well as commands to turn this feature on/off (`allow_power_on` and `block_power_on`). Should work for all Android TVs, not sure about other models
 
 **Fixed**
 - Paths issue when running outside Pylips folder on Windows systems

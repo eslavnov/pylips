@@ -1,550 +1,559 @@
 {
-   "get":{
-      "current_channel":{
-         "path":"activities/tv"
-      },
-      "current_app":{
-         "path":"activities/current"
-      },
-      "list_channels":{
-         "path":"channeldb/tv/channelLists/all"
-      },
-      "list_favorite":{
-         "path":"channeldb/tv/favoritelLists/all"
-      },
-      "powerstate":{
-         "path":"powerstate"
-      },
-      "volume":{
-         "path":"audio/volume"
-      }
-   },
-   "post":{
-      "ambilight_on":{
-         "path":"ambilight/power",
-         "body":{
-            "power":"On"
-         }
-      },
-      "ambilight_off":{
-         "path":"ambilight/power",
-         "body":{
-            "power":"Off"
-         }
-      },
-      "ambilight_video_immersive":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_VIDEO",
-            "isExpert":"false",
-            "menuSetting":"IMMERSIVE"
-         }
-      },
-      "ambilight_video_standard":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_VIDEO",
-            "isExpert":"false",
-            "menuSetting":"STANDARD"
-         }
-      },
-      "ambilight_video_natural":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_VIDEO",
-            "isExpert":"false",
-            "menuSetting":"NATURAL"
-         }
-      },
-      "ambilight_video_vivid":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_VIDEO",
-            "isExpert":"false",
-            "menuSetting":"VIVID"
-         }
-      },
-      "ambilight_video_game":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_VIDEO",
-            "isExpert":"false",
-            "menuSetting":"GAME"
-         }
-      },
-      "ambilight_video_comfort":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_VIDEO",
-            "isExpert":"false",
-            "menuSetting":"COMFORT"
-         }
-      },
-      "ambilight_video_relax":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_VIDEO",
-            "isExpert":"false",
-            "menuSetting":"RELAX"
-         }
-      },
-      "ambilight_audio_adapt_brightness":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_AUDIO",
-            "isExpert":"false",
-            "menuSetting":"ENERGY_ADAPTIVE_BRIGHTNESS"
-         }
-      },
-      "ambilight_audio_adapt_colors":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_AUDIO",
-            "isExpert":"false",
-            "menuSetting":"ENERGY_ADAPTIVE_COLORS"
-         }
-      },
-      "ambilight_audio_vu_meter":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_AUDIO",
-            "isExpert":"false",
-            "menuSetting":"VU_METER"
-         }
-      },
-      "ambilight_audio_spectrum":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_AUDIO",
-            "isExpert":"false",
-            "menuSetting":"SPECTRUM_ANALYZER"
-         }
-      },
-      "ambilight_audio_knight_rider_1":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_AUDIO",
-            "isExpert":"false",
-            "menuSetting":"KNIGHT_RIDER_CLOCKWISE"
-         }
-      },
-      "ambilight_audio_knight_rider_2":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_AUDIO",
-            "isExpert":"false",
-            "menuSetting":"KNIGHT_RIDER_ALTERNATING"
-         }
-      },
-      "ambilight_audio_flash":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_AUDIO",
-            "isExpert":"false",
-            "menuSetting":"RANDOM_PIXEL_FLASH"
-         }
-      },
-      "ambilight_audio_strobo":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_AUDIO",
-            "isExpert":"false",
-            "menuSetting":"STROBO"
-         }
-      },
-      "ambilight_audio_party":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_AUDIO",
-            "isExpert":"false",
-            "menuSetting":"PARTY"
-         }
-      },
-      "ambilight_audio_random":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_AUDIO",
-            "isExpert":"false",
-            "menuSetting":"MODE_RANDOM"
-         }
-      },
-      "ambilight_brightness":{
-         "path":"menuitems/settings/update",
-         "body":{
-            "values":[
-               {
-                  "value":{
-                     "Nodeid":2131230769,
-                     "Controllable":"true",
-                     "Available":"true",
-                     "string_id":"Brightness",
-                     "data":{
+	"power": {
+		"power_on": {
+			"path": "apps/ChromeCast"
+		}
+	},
+	"get": {
+		"current_channel": {
+			"path": "activities/tv"
+		},
+		"current_app": {
+			"path": "activities/current"
+		},
+		"list_channels": {
+			"path": "channeldb/tv/channelLists/all"
+		},
+		"list_favorite": {
+			"path": "channeldb/tv/favoritelLists/all"
+		},
+		"powerstate": {
+			"path": "powerstate"
+		},
+		"volume": {
+			"path": "audio/volume"
+		}
+	},
+	"post": {
+		"allow_power_on": {
+			"path": "menuitems/settings/update",
+			"body": {
+				"values":[{"value":{"Nodeid":2131230736, "data": {"selected_item":1}}}]
+			}
+		},
+		"block_power_on": {
+			"path": "menuitems/settings/update",
+			"body": {
+				"values":[{"value":{"Nodeid":2131230736, "data": {"selected_item":0}}}]
+			}
+		},
+		"ambilight_on": {
+			"path": "ambilight/power",
+			"body": {
+				"power": "On"
+			}
+		},
+		"ambilight_off": {
+			"path": "ambilight/power",
+			"body": {
+				"power": "Off"
+			}
+		},
+		"ambilight_video_immersive": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_VIDEO",
+				"isExpert": "false",
+				"menuSetting": "IMMERSIVE"
+			}
+		},
+		"ambilight_video_standard": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_VIDEO",
+				"isExpert": "false",
+				"menuSetting": "STANDARD"
+			}
+		},
+		"ambilight_video_natural": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_VIDEO",
+				"isExpert": "false",
+				"menuSetting": "NATURAL"
+			}
+		},
+		"ambilight_video_vivid": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_VIDEO",
+				"isExpert": "false",
+				"menuSetting": "VIVID"
+			}
+		},
+		"ambilight_video_game": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_VIDEO",
+				"isExpert": "false",
+				"menuSetting": "GAME"
+			}
+		},
+		"ambilight_video_comfort": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_VIDEO",
+				"isExpert": "false",
+				"menuSetting": "COMFORT"
+			}
+		},
+		"ambilight_video_relax": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_VIDEO",
+				"isExpert": "false",
+				"menuSetting": "RELAX"
+			}
+		},
+		"ambilight_audio_adapt_brightness": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_AUDIO",
+				"isExpert": "false",
+				"menuSetting": "ENERGY_ADAPTIVE_BRIGHTNESS"
+			}
+		},
+		"ambilight_audio_adapt_colors": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_AUDIO",
+				"isExpert": "false",
+				"menuSetting": "ENERGY_ADAPTIVE_COLORS"
+			}
+		},
+		"ambilight_audio_vu_meter": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_AUDIO",
+				"isExpert": "false",
+				"menuSetting": "VU_METER"
+			}
+		},
+		"ambilight_audio_spectrum": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_AUDIO",
+				"isExpert": "false",
+				"menuSetting": "SPECTRUM_ANALYZER"
+			}
+		},
+		"ambilight_audio_knight_rider_1": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_AUDIO",
+				"isExpert": "false",
+				"menuSetting": "KNIGHT_RIDER_CLOCKWISE"
+			}
+		},
+		"ambilight_audio_knight_rider_2": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_AUDIO",
+				"isExpert": "false",
+				"menuSetting": "KNIGHT_RIDER_ALTERNATING"
+			}
+		},
+		"ambilight_audio_flash": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_AUDIO",
+				"isExpert": "false",
+				"menuSetting": "RANDOM_PIXEL_FLASH"
+			}
+		},
+		"ambilight_audio_strobo": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_AUDIO",
+				"isExpert": "false",
+				"menuSetting": "STROBO"
+			}
+		},
+		"ambilight_audio_party": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_AUDIO",
+				"isExpert": "false",
+				"menuSetting": "PARTY"
+			}
+		},
+		"ambilight_audio_random": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_AUDIO",
+				"isExpert": "false",
+				"menuSetting": "MODE_RANDOM"
+			}
+		},
+		"ambilight_brightness": {
+			"path": "menuitems/settings/update",
+			"body": {
+				"values": [{
+					"value": {
+						"Nodeid": 2131230769,
+						"Controllable": "true",
+						"Available": "true",
+						"string_id": "Brightness",
+						"data": {
 
-                     }
-                  }
-               }
-            ]
-         }
-      },
-      "ambilight_color":{
-         "path":"ambilight/currentconfiguration",
-         "body":{
-            "styleName":"FOLLOW_COLOR",
-            "isExpert":"true",
-            "algorithm":"MANUAL_HUE",
-            "colorSettings":{
-               "color":{
+						}
+					}
+				}]
+			}
+		},
+		"ambilight_color": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_COLOR",
+				"isExpert": "true",
+				"algorithm": "MANUAL_HUE",
+				"colorSettings": {
+					"color": {
 
-               },
-               "colorDelta":{
-                  "hue":0,
-                  "saturation":0,
-                  "brightness":0
-               },
-               "speed":255
-            }
-         }
-      },
-      "ambihue_status":{
-         "path":"menuitems/settings/current",
-         "body":{
-            "nodes":[
-               {
-                  "nodeid":2131230774
-               }
-            ]
-         }
-      },
-      "ambihue_on":{
-         "path":"menuitems/settings/update",
-         "body":{
-            "values":[
-               {
-                  "value":{
-                     "Nodeid":2131230774,
-                     "Controllable":"true",
-                     "Available":"true",
-                     "data":{
-                        "value":"true"
-                     }
-                  }
-               }
-            ]
-         }
-      },
-      "ambihue_off":{
-         "path":"menuitems/settings/update",
-         "body":{
-            "values":[
-               {
-                  "value":{
-                     "Nodeid":2131230774,
-                     "Controllable":"true",
-                     "Available":"true",
-                     "data":{
-                        "value":"false"
-                     }
-                  }
-               }
-            ]
-         }
-      },
-      "standby":{
-         "path":"input/key",
-         "body":{
-            "key":"Standby"
-         }
-      },
-      "mute":{
-         "path":"input/key",
-         "body":{
-            "key":"Mute"
-         }
-      },
-      "volume_up":{
-         "path":"input/key",
-         "body":{
-            "key":"VolumeUp"
-         }
-      },
-      "volume_down":{
-         "path":"input/key",
-         "body":{
-            "key":"VolumeDown"
-         }
-      },
-      "channel_up":{
-         "path":"input/key",
-         "body":{
-            "key":"ChannelStepUp"
-         }
-      },
-      "channel_down":{
-         "path":"input/key",
-         "body":{
-            "key":"ChannelStepDown"
-         }
-      },
-      "play":{
-         "path":"input/key",
-         "body":{
-            "key":"Play"
-         }
-      },
-      "pause":{
-         "path":"input/key",
-         "body":{
-            "key":"Pause"
-         }
-      },
-      "play_pause":{
-         "path":"input/key",
-         "body":{
-            "key":"PlayPause"
-         }
-      },
-      "stop":{
-         "path":"input/key",
-         "body":{
-            "key":"Stop"
-         }
-      },
-      "fast_forward":{
-         "path":"input/key",
-         "body":{
-            "key":"FastForward"
-         }
-      },
-      "rewind":{
-         "path":"input/key",
-         "body":{
-            "key":"Rewind"
-         }
-      },
-      "next":{
-         "path":"input/key",
-         "body":{
-            "key":"Next"
-         }
-      },
-      "previous":{
-         "path":"input/key",
-         "body":{
-            "key":"Previous"
-         }
-      },
-      "cursor_up":{
-         "path":"input/key",
-         "body":{
-            "key":"CursorUp"
-         }
-      },
-      "cursor_down":{
-         "path":"input/key",
-         "body":{
-            "key":"CursorDown"
-         }
-      },
-      "cursor_left":{
-         "path":"input/key",
-         "body":{
-            "key":"CursorLeft"
-         }
-      },
-      "cursor_right":{
-         "path":"input/key",
-         "body":{
-            "key":"CursorRight"
-         }
-      },
-      "confirm":{
-         "path":"input/key",
-         "body":{
-            "key":"Confirm"
-         }
-      },
-      "back":{
-         "path":"input/key",
-         "body":{
-            "key":"Back"
-         }
-      },
-      "find":{
-         "path":"input/key",
-         "body":{
-            "key":"Find"
-         }
-      },
-      "red":{
-         "path":"input/key",
-         "body":{
-            "key":"RedColour"
-         }
-      },
-      "green":{
-         "path":"input/key",
-         "body":{
-            "key":"GreenColour"
-         }
-      },
-      "yellow":{
-         "path":"input/key",
-         "body":{
-            "key":"YellowColour"
-         }
-      },
-      "blue":{
-         "path":"input/key",
-         "body":{
-            "key":"BlueColour"
-         }
-      },
-      "home":{
-         "path":"input/key",
-         "body":{
-            "key":"Home"
-         }
-      },
-      "options":{
-         "path":"input/key",
-         "body":{
-            "key":"Options"
-         }
-      },
-      "dot":{
-         "path":"input/key",
-         "body":{
-            "key":"Dot"
-         }
-      },
-      "digit_0":{
-         "path":"input/key",
-         "body":{
-            "key":"Digit0"
-         }
-      },
-      "digit_1":{
-         "path":"input/key",
-         "body":{
-            "key":"Digit1"
-         }
-      },
-      "digit_2":{
-         "path":"input/key",
-         "body":{
-            "key":"Digit2"
-         }
-      },
-      "digit_3":{
-         "path":"input/key",
-         "body":{
-            "key":"Digit3"
-         }
-      },
-      "digit_4":{
-         "path":"input/key",
-         "body":{
-            "key":"Digit4"
-         }
-      },
-      "digit_5":{
-         "path":"input/key",
-         "body":{
-            "key":"Digit5"
-         }
-      },
-      "digit_6":{
-         "path":"input/key",
-         "body":{
-            "key":"Digit6"
-         }
-      },
-      "digit_7":{
-         "path":"input/key",
-         "body":{
-            "key":"Digit7"
-         }
-      },
-      "digit_8":{
-         "path":"input/key",
-         "body":{
-            "key":"Digit8"
-         }
-      },
-      "digit_9":{
-         "path":"input/key",
-         "body":{
-            "key":"Digit9"
-         }
-      },
-      "info":{
-         "path":"input/key",
-         "body":{
-            "key":"Info"
-         }
-      },
-      "adjust":{
-         "path":"input/key",
-         "body":{
-            "key":"Adjust"
-         }
-      },
-      "watch_tv":{
-         "path":"input/key",
-         "body":{
-            "key":"WatchTV"
-         }
-      },
-      "viewmode":{
-         "path":"input/key",
-         "body":{
-            "key":"Viewmode"
-         }
-      },
-      "teletext":{
-         "path":"input/key",
-         "body":{
-            "key":"Teletext"
-         }
-      },
-      "subtitle":{
-         "path":"input/key",
-         "body":{
-            "key":"Subtitle"
-         }
-      },
-      "source":{
-         "path":"input/key",
-         "body":{
-            "key":"Source"
-         }
-      },
-      "ambilight_onoff":{
-         "path":"input/key",
-         "body":{
-            "key":"AmbilightOnOff"
-         }
-      },
-      "record":{
-         "path":"input/key",
-         "body":{
-            "key":"Record"
-         }
-      },
-      "online":{
-         "path":"input/key",
-         "body":{
-            "key":"Online"
-         }
-      },
-      "launch_app":{
-         "path":"activities/launch"
-      },
-      "set_channel":{
-         "path":"activities/tv"
-      },
-      "update_settings":{
-         "path":"menuitems/settings/update"
-      }
-   }
+					},
+					"colorDelta": {
+						"hue": 0,
+						"saturation": 0,
+						"brightness": 0
+					},
+					"speed": 255
+				}
+			}
+		},
+		"ambihue_status": {
+			"path": "menuitems/settings/current",
+			"body": {
+				"nodes": [{
+					"nodeid": 2131230774
+				}]
+			}
+		},
+		"ambihue_on": {
+			"path": "menuitems/settings/update",
+			"body": {
+				"values": [{
+					"value": {
+						"Nodeid": 2131230774,
+						"Controllable": "true",
+						"Available": "true",
+						"data": {
+							"value": "true"
+						}
+					}
+				}]
+			}
+		},
+		"ambihue_off": {
+			"path": "menuitems/settings/update",
+			"body": {
+				"values": [{
+					"value": {
+						"Nodeid": 2131230774,
+						"Controllable": "true",
+						"Available": "true",
+						"data": {
+							"value": "false"
+						}
+					}
+				}]
+			}
+		},
+		"standby": {
+			"path": "input/key",
+			"body": {
+				"key": "Standby"
+			}
+		},
+		"mute": {
+			"path": "input/key",
+			"body": {
+				"key": "Mute"
+			}
+		},
+		"volume_up": {
+			"path": "input/key",
+			"body": {
+				"key": "VolumeUp"
+			}
+		},
+		"volume_down": {
+			"path": "input/key",
+			"body": {
+				"key": "VolumeDown"
+			}
+		},
+		"channel_up": {
+			"path": "input/key",
+			"body": {
+				"key": "ChannelStepUp"
+			}
+		},
+		"channel_down": {
+			"path": "input/key",
+			"body": {
+				"key": "ChannelStepDown"
+			}
+		},
+		"play": {
+			"path": "input/key",
+			"body": {
+				"key": "Play"
+			}
+		},
+		"pause": {
+			"path": "input/key",
+			"body": {
+				"key": "Pause"
+			}
+		},
+		"play_pause": {
+			"path": "input/key",
+			"body": {
+				"key": "PlayPause"
+			}
+		},
+		"stop": {
+			"path": "input/key",
+			"body": {
+				"key": "Stop"
+			}
+		},
+		"fast_forward": {
+			"path": "input/key",
+			"body": {
+				"key": "FastForward"
+			}
+		},
+		"rewind": {
+			"path": "input/key",
+			"body": {
+				"key": "Rewind"
+			}
+		},
+		"next": {
+			"path": "input/key",
+			"body": {
+				"key": "Next"
+			}
+		},
+		"previous": {
+			"path": "input/key",
+			"body": {
+				"key": "Previous"
+			}
+		},
+		"cursor_up": {
+			"path": "input/key",
+			"body": {
+				"key": "CursorUp"
+			}
+		},
+		"cursor_down": {
+			"path": "input/key",
+			"body": {
+				"key": "CursorDown"
+			}
+		},
+		"cursor_left": {
+			"path": "input/key",
+			"body": {
+				"key": "CursorLeft"
+			}
+		},
+		"cursor_right": {
+			"path": "input/key",
+			"body": {
+				"key": "CursorRight"
+			}
+		},
+		"confirm": {
+			"path": "input/key",
+			"body": {
+				"key": "Confirm"
+			}
+		},
+		"back": {
+			"path": "input/key",
+			"body": {
+				"key": "Back"
+			}
+		},
+		"find": {
+			"path": "input/key",
+			"body": {
+				"key": "Find"
+			}
+		},
+		"red": {
+			"path": "input/key",
+			"body": {
+				"key": "RedColour"
+			}
+		},
+		"green": {
+			"path": "input/key",
+			"body": {
+				"key": "GreenColour"
+			}
+		},
+		"yellow": {
+			"path": "input/key",
+			"body": {
+				"key": "YellowColour"
+			}
+		},
+		"blue": {
+			"path": "input/key",
+			"body": {
+				"key": "BlueColour"
+			}
+		},
+		"home": {
+			"path": "input/key",
+			"body": {
+				"key": "Home"
+			}
+		},
+		"options": {
+			"path": "input/key",
+			"body": {
+				"key": "Options"
+			}
+		},
+		"dot": {
+			"path": "input/key",
+			"body": {
+				"key": "Dot"
+			}
+		},
+		"digit_0": {
+			"path": "input/key",
+			"body": {
+				"key": "Digit0"
+			}
+		},
+		"digit_1": {
+			"path": "input/key",
+			"body": {
+				"key": "Digit1"
+			}
+		},
+		"digit_2": {
+			"path": "input/key",
+			"body": {
+				"key": "Digit2"
+			}
+		},
+		"digit_3": {
+			"path": "input/key",
+			"body": {
+				"key": "Digit3"
+			}
+		},
+		"digit_4": {
+			"path": "input/key",
+			"body": {
+				"key": "Digit4"
+			}
+		},
+		"digit_5": {
+			"path": "input/key",
+			"body": {
+				"key": "Digit5"
+			}
+		},
+		"digit_6": {
+			"path": "input/key",
+			"body": {
+				"key": "Digit6"
+			}
+		},
+		"digit_7": {
+			"path": "input/key",
+			"body": {
+				"key": "Digit7"
+			}
+		},
+		"digit_8": {
+			"path": "input/key",
+			"body": {
+				"key": "Digit8"
+			}
+		},
+		"digit_9": {
+			"path": "input/key",
+			"body": {
+				"key": "Digit9"
+			}
+		},
+		"info": {
+			"path": "input/key",
+			"body": {
+				"key": "Info"
+			}
+		},
+		"adjust": {
+			"path": "input/key",
+			"body": {
+				"key": "Adjust"
+			}
+		},
+		"watch_tv": {
+			"path": "input/key",
+			"body": {
+				"key": "WatchTV"
+			}
+		},
+		"viewmode": {
+			"path": "input/key",
+			"body": {
+				"key": "Viewmode"
+			}
+		},
+		"teletext": {
+			"path": "input/key",
+			"body": {
+				"key": "Teletext"
+			}
+		},
+		"subtitle": {
+			"path": "input/key",
+			"body": {
+				"key": "Subtitle"
+			}
+		},
+		"source": {
+			"path": "input/key",
+			"body": {
+				"key": "Source"
+			}
+		},
+		"ambilight_onoff": {
+			"path": "input/key",
+			"body": {
+				"key": "AmbilightOnOff"
+			}
+		},
+		"record": {
+			"path": "input/key",
+			"body": {
+				"key": "Record"
+			}
+		},
+		"online": {
+			"path": "input/key",
+			"body": {
+				"key": "Online"
+			}
+		},
+		"launch_app": {
+			"path": "activities/launch"
+		},
+		"set_channel": {
+			"path": "activities/tv"
+		},
+		"update_settings": {
+			"path": "menuitems/settings/update"
+		}
+	}
 }

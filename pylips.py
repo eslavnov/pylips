@@ -1,4 +1,4 @@
-# version 1.0.11
+# version 1.1.0
 import platform    
 import subprocess
 import configparser
@@ -318,6 +318,8 @@ class Pylips:
                 return self.post(self.available_commands["post"][command]["path"],new_body,verbose, callback)
             else:
                 return self.post(self.available_commands["post"][command]["path"], body,verbose, callback)
+        elif command in self.available_commands["power"]:
+            return session.post("http://" + str(self.config["TV"]["host"]) +":8008/"+self.available_commands["power"][command]["path"], verify=False, timeout=2)
         else:
             print("Unknown command")
 
