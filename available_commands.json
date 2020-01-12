@@ -31,12 +31,6 @@
 				"values":[{"value":{"Nodeid":2131230736, "data": {"selected_item":1}}}]
 			}
 		},
-		"block_power_on": {
-			"path": "menuitems/settings/update",
-			"body": {
-				"values":[{"value":{"Nodeid":2131230736, "data": {"selected_item":0}}}]
-			}
-		},
 		"ambilight_on": {
 			"path": "ambilight/power",
 			"body": {
