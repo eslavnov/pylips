@@ -304,6 +304,10 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 
 ## Change log
 
+### 1.1.1 - 2020-02-20
+**Fixed**
+- MQTT payload encoded with utf8 is now correctly decoded. Thx @popy2k14!
+
 ### 1.1.0 - 2020-01-12
 **Added**
 - Remote `power_on` command that works even from sleep mode. Should work for all Android TVs, not sure about other models. Thx [@neophob](https://github.com/neophob)!

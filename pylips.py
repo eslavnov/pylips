@@ -1,4 +1,4 @@
-# version 1.1.0
+# version 1.1.1
 import platform    
 import subprocess
 import configparser
@@ -335,7 +335,7 @@ class Pylips:
             client.subscribe(self.config["MQTT"]["topic_pylips"])
         def on_message(client, userdata, msg):
             if str(msg.topic)==self.config["MQTT"]["topic_pylips"]:
-                message = json.loads(msg.payload)
+                message = json.loads(msg.payload.decode('utf-8'))
                 if "status" in message:
                     self.mqtt_update_status(message["status"])
                 if "command" in message:
