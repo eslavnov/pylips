@@ -173,6 +173,11 @@ Any passed arguments will override the settings in `settings.ini` without overwr
 1. `ambilight_video_game` - Sets Ambilight to 'Follow video' (Game)
 1. `ambilight_video_comfort` - Sets Ambilight to 'Follow video' (Comfort)
 1. `ambilight_video_relax` - Sets Ambilight to 'Follow video' (Relax)
+1. `ambilight_color_hot_lava` - Sets Ambilight to 'Follow color' (Hot lava)
+1. `ambilight_color_warm_white` - Sets Ambilight to 'Follow color' (Warm white)
+1. `ambilight_color_cool_white` - Sets Ambilight to 'Follow color' (Cool white)
+1. `ambilight_color_fresh_nature` - Sets Ambilight to 'Follow color' (Fresh nature)
+1. `ambilight_deep_water` - Sets Ambilight to 'Follow color' (Deep water)
 1. `ambilight_audio_adapt_brightness` - Sets Ambilight to 'Follow audio' (Energy Adaptive Brightness)
 1. `ambilight_audio_adapt_colors` - Sets Ambilight to 'Follow audio' (Energy Adaptive Colors)
 1. `ambilight_audio_vu_meter` - Sets Ambilight to 'Follow audio' (VU Meter)
@@ -303,6 +308,10 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 [The API reference](https://github.com/eslavnov/Pylips/wiki).
 
 ## Change log
+
+### 1.2.0 - 2020-02-28
+**Added**
+- `ambilight_color_hot_lava`, `ambilight_color_warm_white`, `ambilight_color_cool_white`, `ambilight_color_fresh_nature`, `ambilight_color_deep_water` commands
 
 ### 1.1.1 - 2020-02-20
 **Fixed**
