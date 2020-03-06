@@ -2,7 +2,7 @@
 Pylips is a Python tool to control Philips TVs (2015+) through their reverse-engineered API. 
 
 1. Supports both Android and non-Android TVs
-1. 80 built-in commands + support for custom "GET" and "POST" requests to the API
+1. 80+ built-in commands + support for custom "GET" and "POST" requests to the API
 1. All commands work on TVs with API version 6, most of them also work for API version 5
 1. Full control of Ambilight including color, brightness, mode and 'Ambilight + Hue'
 1. Allows sending TV status updates and receiving commands over MQTT
