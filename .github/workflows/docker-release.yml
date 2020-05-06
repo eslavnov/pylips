@@ -1,0 +1,38 @@
+name: '[docker] CI for releases'
+
+on:
+    push:
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v1
+
+            -   name: Inject slug/short variables
+                uses: rlespinasse/github-slug-action@v2.x
+
+            -   name: Get build time
+                uses: 1466587594/get-current-time@v1
+                id: current-time
+
+            -   name: Dockerhub login
+                run: |
+                    echo "${{ secrets.DOCKER_TOKEN }}" | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+            -   name: Set up Docker Buildx
+                id: buildx
+                uses: crazy-max/ghaction-docker-buildx@v1
+                with:
+                    version: latest
+
+            -   name: Build docker multiarch images and push to Dockerhub
+                run: |
+                    docker buildx build \
+                    --platform=linux/386,linux/amd64,linux/arm/v7,linux/arm64 \
+                    --build-arg BUILD_DATE=${{ steps.current-time.outputs.time }} \
+                    --build-arg VCS_REF=${{ env.GITHUB_SHA_SHORT }} \
+                    --output "type=image,push=true" \
+                    --file ./Dockerfile . \
+                    -t "${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}:latest"
