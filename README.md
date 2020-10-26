@@ -308,6 +308,9 @@ All endpoints in API reference are tested and fully working unless explicitly ma
 [The API reference](https://github.com/eslavnov/Pylips/wiki).
 
 ## Change log
+### 1.2.1 - 2020-10-26
+**Changed**
+- respect verbose setting on get/post methods (do not print results if verbose = False)
 
 ### 1.2.0 - 2020-02-28
 **Added**

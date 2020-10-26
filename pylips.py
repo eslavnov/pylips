@@ -1,4 +1,4 @@
-# version 1.2.0
+# version 1.2.1
 import platform    
 import subprocess
 import configparser
@@ -259,7 +259,8 @@ class Pylips:
             if verbose:
                 print("Request sent!")
             if len(r.text) > 0:
-                print(r.text)
+                if verbose:
+                    print(r.text)
                 return r.text
         else:
             if self.config["DEFAULT"]["mqtt_listen"].lower()=="true":
@@ -284,7 +285,8 @@ class Pylips:
                 # run mqtt callback to update the status (only in MQTT mode)
                 self.mqtt_callback(path)
             if len(r.text) > 0:
-                print(r.text)
+                if verbose:
+                    print(r.text)
                 return r.text
             elif r.status_code == 200:
                 print(json.dumps({"response":"OK"}))
