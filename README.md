@@ -164,7 +164,7 @@ Any passed arguments will override the settings in `settings.ini` without overwr
 1. `ambihue_status` - Returns the current status of 'Ambilight + Hue'
 1. `ambihue_on` - Turns 'Ambilight + Hue' on
 1. `ambihue_off` - Turns 'Ambilight + Hue' off
-1. `ambilight_color` - Sets ambilight color. Requires a valid `--body` argument: `{"hue": 360, "saturation": 100, "brightness": 255}`
+1. `ambilight_color` - Sets ambilight color (in HSV format). Requires a valid `--body` argument: `{"hue": 360, "saturation": 100, "brightness": 255}`
 1. `ambilight_brightness` - Sets ambilight brightness. Requires a valid `--body` argument: `{"value": 10}`
 1. `ambilight_video_immersive` - Sets Ambilight to 'Follow video' (Immersive)
 1. `ambilight_video_standard` - Sets Ambilight to 'Follow video' (Standard)
