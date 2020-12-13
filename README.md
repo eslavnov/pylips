@@ -18,6 +18,7 @@ The current version of the API does not allow switching input sources anymore. F
     1. [Built-in commands](#built-in-commands)
     1. [Custom commands](#custom-commands)
 1. [Controlling the TV (MQTT mode)](#controlling-the-tv-mqtt-mode)
+1. [Switching input sources](#switching-input-sources)
 1. [API reference](#api-reference)
 1. [Change log](#change-log)
 1. [TO-DO](#to-do)
