@@ -350,6 +350,7 @@ adb shell am start -a android.intent.action.VIEW -d content://android.media.tv/p
 
 **Fixed**
 - Improved handling of Ambilight + Hue feature, hopefully it should now work correctly for all models. Thank you all for the provided feedback and especially @Mr-Groch.
+- Verbose option is now properly respected in all modes.
 
 ### 1.2.0 - 2020-02-28
 **Added**
