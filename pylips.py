@@ -1,4 +1,4 @@
-# version 1.2.0
+# version 1.3.0
 import platform    
 import subprocess
 import configparser
@@ -31,7 +31,7 @@ parser.add_argument("--pass", dest="password", help="Password")
 parser.add_argument("--command", help="Command to run", default="")
 parser.add_argument("--path", dest="path", help="API's endpoint path")
 parser.add_argument("--body", dest="body", help="Body for post requests")
-parser.add_argument("--verbose", dest="verbose", help="Display feedback", default="1")
+parser.add_argument("--verbose", dest="verbose", help="Display feedback")
 parser.add_argument("--apiv", dest="apiv", help="Api version", default="")
 parser.add_argument("--config", dest="config", help="Path to config file", default=os.path.dirname(os.path.realpath(__file__))+os.path.sep+"settings.ini")
 
@@ -53,12 +53,19 @@ class Pylips:
         if args.host is None and self.config["TV"]["host"]=="":
             return print("Please set your TV's IP-address with a --host parameter or in [TV] section in settings.ini")
             
+        # check verbose option
+        if self.config["DEFAULT"]["verbose"] == "True":
+            self.verbose = True
+        else:
+            self.verbose = False
+
         # override config with passed args
         if len(sys.argv)>1:
-            if args.verbose=="1" or args.verbose.lower()=="true":
-                self.config["DEFAULT"]["verbose"]="True"
-            else:
-                self.config["DEFAULT"]["verbose"]="False"
+            if args.verbose is not None:
+                if args.verbose.lower()=="true":
+                  self.verbose = True
+                else:
+                  self.verbose = False
             if args.host:
                 self.config["TV"]["host"] = args.host
             if args.user and args.password:
@@ -70,12 +77,7 @@ class Pylips:
                 return print ("If you have an Android TV, please provide both a username and a password (--user and --pass)")
             if len(args.apiv) != 0:
                 self.config["TV"]["apiv"]=args.apiv
-                
-        # check verbose option
-        if self.config["DEFAULT"]["verbose"] == "True":
-            self.verbose = True
-        else:
-            self.verbose = False
+
         # check API version
         if len(self.config["TV"]["apiv"])==0:
             if self.find_api_version(self.verbose):
@@ -147,8 +149,6 @@ class Pylips:
                     print("Connection refused")
                     continue
                 if r.status_code == 200:
-                    print(r.json())
-
                     self.config["TV"]["apiv"]= str(r.json()["api_version"]["Major"])
                     if "featuring" in r.json() and "systemfeatures" in r.json()["featuring"] and "pairing_type" in r.json()["featuring"]["systemfeatures"] and r.json()["featuring"]["systemfeatures"]["pairing_type"] == "digest_auth_pairing":
                         self.config["TV"]["protocol"] = "https://"
@@ -195,7 +195,6 @@ class Pylips:
 
     # pairs with a TV
     def pair_request(self, data, err_count=0):
-        print(data)
         print("https://" + str(self.config["TV"]["host"]) + ":1926/"+str(self.config["TV"]["apiv"])+"/pair/request")
         response={}
         r = session.post("https://" + str(self.config["TV"]["host"]) + ":1926/"+str(self.config["TV"]["apiv"])+"/pair/request", json=data, verify=False, timeout=2)
@@ -232,10 +231,7 @@ class Pylips:
             if err_count > 0:
                 print("Resending pair confirm request")
             try:
-                # print(data)
                 r = session.post("https://" + str(self.config["TV"]["host"]) +":1926/"+str(self.config["TV"]["apiv"])+"/pair/grant", json=data, verify=False, auth=HTTPDigestAuth(self.config["TV"]["user"], self.config["TV"]["pass"]),timeout=2)
-                print (r.request.headers)
-                print (r.request.body)
                 print("Username for subsequent calls is: " + str(self.config["TV"]["user"]))
                 print("Password for subsequent calls is: " + str(self.config["TV"]["pass"]))
                 return print("The credentials are saved in the settings.ini file.")
@@ -247,7 +243,7 @@ class Pylips:
             return print("The API is unreachable. Try restarting your TV and pairing again")
 
     # sends a general GET request
-    def get(self, path, verbose=True, err_count=0):
+    def get(self, path, verbose=True, err_count=0, print_response=True):
         while err_count < int(self.config["DEFAULT"]["num_retries"]):
             if verbose:
                 print("Sending GET request to", str(self.config["TV"]["protocol"]) + str(self.config["TV"]["host"]) + ":" + str(self.config["TV"]["port"]) + "/" + str(self.config["TV"]["apiv"]) + "/" + str(path))
@@ -259,7 +255,8 @@ class Pylips:
             if verbose:
                 print("Request sent!")
             if len(r.text) > 0:
-                print(r.text)
+                if print_response:
+                  print(r.text)
                 return r.text
         else:
             if self.config["DEFAULT"]["mqtt_listen"].lower()=="true":
@@ -296,25 +293,35 @@ class Pylips:
             return json.dumps({"error":"Can not reach the API"})
 
     # runs a command
-    def run_command(self, command, body=None, verbose=True, callback=True):
+    def run_command(self, command, body=None, verbose=True, callback=True, print_response=True):
         if command in self.available_commands["get"]:
-            return self.get(self.available_commands["get"][command]["path"],verbose)
+            return self.get(self.available_commands["get"][command]["path"],verbose, 0, print_response)
         elif command in self.available_commands["post"]:
             if "body" in self.available_commands["post"][command] and body is None:
-                return self.post(self.available_commands["post"][command]["path"],self.available_commands["post"][command]["body"],verbose, callback)
+                if "input_" in command:
+                    body = self.available_commands["post"]["google_assistant"]["body"]
+                    path = self.available_commands["post"]["google_assistant"]["path"]
+                    body["intent"]["extras"]["query"] = self.available_commands["post"][command]["body"]["query"]
+                else:
+                  body = self.available_commands["post"][command]["body"]
+                  path = self.available_commands["post"][command]["path"]
+                return self.post(path,body,verbose, callback)
             if "body" in self.available_commands["post"][command] and body is not None:
+                if type(body) is str:
+                    body = json.loads(body)
                 new_body = self.available_commands["post"][command]["body"]
                 if command == "ambilight_brightness":
-                    if type(body) is str:
-                        body = json.loads(body)
                     new_body["values"][0]["value"]["data"] = body
                 elif command == "ambilight_color":
-                    if type(body) is str:
-                        body = json.loads(body)
                     new_body["colorSettings"]["color"]["hue"] = int(body["hue"]*(255/360))
                     new_body["colorSettings"]["color"]["saturation"]=int(body["saturation"]*(255/100))
                     new_body["colorSettings"]["color"]["brightness"]=int(body["brightness"])
-                return self.post(self.available_commands["post"][command]["path"],new_body,verbose, callback)
+                elif command == "google_assistant":
+                    new_body["intent"]["extras"]["query"] = body["query"]
+                elif "input_" in command:
+                    new_body = self.available_commands["google_assistant"][command]
+                    new_body["intent"]["extras"]["query"] = self.available_commands["post"][command]["body"]["query"]
+                return self.post(self.available_commands["post"][command]["path"], new_body, verbose, callback)
             else:
                 return self.post(self.available_commands["post"][command]["path"], body,verbose, callback)
         elif command in self.available_commands["power"]:
@@ -348,7 +355,7 @@ class Pylips:
                     if message["command"] == "get":
                         if len(path)==0:
                             return print("Please provide a 'path' argument")
-                        self.get(path,self.verbose)
+                        self.get(path,self.verbose,0,False)
                     elif message["command"] == "post":
                         if len(path)==0:
                             return print("Please provide a 'path' argument")
@@ -382,7 +389,7 @@ class Pylips:
     
     # updates powerstate for MQTT status and returns True if TV is on
     def mqtt_update_powerstate(self):
-        powerstate_status = self.get("powerstate",self.verbose)
+        powerstate_status = self.get("powerstate",self.verbose,0, False)
         if powerstate_status is not None and powerstate_status[0]=='{':
             powerstate_status = json.loads(powerstate_status)
             if "powerstate" in powerstate_status:
@@ -398,7 +405,7 @@ class Pylips:
 
     # updates ambilight for MQTT status
     def mqtt_update_ambilight(self):
-        ambilight_status = self.get("ambilight/currentconfiguration",self.verbose)
+        ambilight_status = self.get("ambilight/currentconfiguration",self.verbose,0,False)
         if ambilight_status is not None and ambilight_status[0]=='{':
             ambilight_status = json.loads(ambilight_status)
             if "styleName" in ambilight_status:
@@ -408,17 +415,17 @@ class Pylips:
     
     # updates ambihue for MQTT status
     def mqtt_update_ambihue(self):
-        ambihue_status = self.run_command("ambihue_status",None,self.verbose, False)
+        ambihue_status = self.run_command("ambihue_status",None,self.verbose, False, False)
         if ambihue_status is not None and ambihue_status[0]=='{':
             ambihue_status = json.loads(ambihue_status)
-            if "values" in ambihue_status:
-                ambihue = ambihue_status["values"][0]["value"]["data"]["value"]
+            if "power" in ambihue_status:
+                ambihue = ambihue_status["power"]
                 if self.last_status["ambihue"] != ambihue:
                     self.mqtt.publish(str(self.config["MQTT"]["topic_pylips"]), json.dumps({"status":{"ambihue":ambihue}}), retain = False)
 
     # updates current app for MQTT status
     def mqtt_update_app(self):
-        actv_status = self.run_command("current_app",None,self.verbose, False)
+        actv_status = self.run_command("current_app",None,self.verbose, False, False)
         if actv_status is not None and actv_status[0]=='{':
             actv_status=json.loads(actv_status)
             if "component" in actv_status:
@@ -439,7 +446,7 @@ class Pylips:
     
     # updates volume and mute state for MQTT status
     def mqtt_update_volume(self):
-        vol_status = self.run_command("volume",None,self.verbose, False)
+        vol_status = self.run_command("volume",None,self.verbose, False, False)
         if vol_status is not None:
             vol_status = json.loads(vol_status)
             if "muted" in vol_status:

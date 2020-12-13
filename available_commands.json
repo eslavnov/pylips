@@ -5,6 +5,9 @@
 		}
 	},
 	"get": {
+    "ambihue_status": {
+			"path": "HueLamp/power"
+		},
 		"current_channel": {
 			"path": "activities/tv"
 		},
@@ -251,43 +254,17 @@
 				}
 			}
 		},
-		"ambihue_status": {
-			"path": "menuitems/settings/current",
-			"body": {
-				"nodes": [{
-					"nodeid": 2131230774
-				}]
-			}
-		},
 		"ambihue_on": {
-			"path": "menuitems/settings/update",
+			"path": "HueLamp/power",
 			"body": {
-				"values": [{
-					"value": {
-						"Nodeid": 2131230774,
-						"Controllable": "true",
-						"Available": "true",
-						"data": {
-							"value": "true"
-						}
-					}
-				}]
-			}
+        "power": "On"
+      }
 		},
 		"ambihue_off": {
-			"path": "menuitems/settings/update",
+			"path": "HueLamp/power",
 			"body": {
-				"values": [{
-					"value": {
-						"Nodeid": 2131230774,
-						"Controllable": "true",
-						"Available": "true",
-						"data": {
-							"value": "false"
-						}
-					}
-				}]
-			}
+        "power": "Off"
+      }
 		},
 		"standby": {
 			"path": "input/key",
@@ -585,6 +562,37 @@
 		},
 		"update_settings": {
 			"path": "menuitems/settings/update"
-		}
+    },
+    "google_assistant": {
+      "path": "activities/launch",
+      "body":  { 
+        "intent": {
+          "extras": {"query": ""}, 
+          "action": "Intent {  act=android.intent.action.ASSIST cmp=com.google.android.katniss/com.google.android.apps.tvsearch.app.launch.trampoline.SearchActivityTrampoline flg=0x10200000 }", 
+          "component": {
+            "packageName":"com.google.android.katniss",
+            "className":"com.google.android.apps.tvsearch.app.launch.trampoline.SearchActivityTrampoline"
+          }
+        }
+      }
+    },
+    "input_hdmi_1": {
+      "body": {
+        "query": "HDMI 1"
+      }
+    },
+    "input_hdmi_2": {
+      "body": {
+        "query": "HDMI 2"
+      }    },
+    "input_hdmi_3": {
+      "body": {
+        "query": "HDMI 3"
+      }    },
+    "input_hdmi_4": {
+      "body": {
+        "query": "HDMI 4"
+      }
+    }    
 	}
 }
