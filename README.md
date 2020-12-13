@@ -343,6 +343,14 @@ adb shell am start -a android.intent.action.VIEW -d content://android.media.tv/p
 
 ## Change log
 
+### 1.3.0 - 2020-12-13
+**Added**
+- `google_assistant` command to send queries to Google Assistant running on the TV. Check updated examples to see how you can use it.
+- `input_hdmi_1`, `input_hdmi_2`, `input_hdmi_3`, `input_hdmi_4` commands to switch input sources (requires Google Assistant).
+
+**Fixed**
+- Improved handling of Ambilight + Hue feature, hopefully it should now work correctly for all models. Thank you all for the provided feedback and especially @Mr-Groch.
+
 ### 1.2.0 - 2020-02-28
 **Added**
 - `ambilight_color_hot_lava`, `ambilight_color_warm_white`, `ambilight_color_cool_white`, `ambilight_color_fresh_nature`, `ambilight_color_deep_water` commands

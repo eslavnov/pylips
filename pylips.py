@@ -300,12 +300,15 @@ class Pylips:
         if command in self.available_commands["get"]:
             return self.get(self.available_commands["get"][command]["path"],verbose)
         elif command in self.available_commands["post"]:
-            # if "ga_query" in self.available_commands["post"][command]:
-            #   ga_body = 
-            #   self.post(self.available_commands["post"][command]["path"],new_body,verbose, callback)
-            #   return self.post()
             if "body" in self.available_commands["post"][command] and body is None:
-                return self.post(self.available_commands["post"][command]["path"],self.available_commands["post"][command]["body"],verbose, callback)
+                if "input_" in command:
+                    body = self.available_commands["post"]["google_assistant"]["body"]
+                    path = self.available_commands["post"]["google_assistant"]["path"]
+                    body["intent"]["extras"]["query"] = self.available_commands["post"][command]["body"]["query"]
+                else:
+                  body = self.available_commands["post"][command]["body"]
+                  path = self.available_commands["post"][command]["path"]
+                return self.post(path,body,verbose, callback)
             if "body" in self.available_commands["post"][command] and body is not None:
                 if type(body) is str:
                     body = json.loads(body)
@@ -318,7 +321,10 @@ class Pylips:
                     new_body["colorSettings"]["color"]["brightness"]=int(body["brightness"])
                 elif command == "google_assistant":
                     new_body["intent"]["extras"]["query"] = body["query"]
-                return self.post(self.available_commands["post"][command]["path"],new_body,verbose, callback)
+                elif "input_" in command:
+                    new_body = self.available_commands["google_assistant"][command]
+                    new_body["intent"]["extras"]["query"] = self.available_commands["post"][command]["body"]["query"]
+                return self.post(self.available_commands["post"][command]["path"], new_body, verbose, callback)
             else:
                 return self.post(self.available_commands["post"][command]["path"], body,verbose, callback)
         elif command in self.available_commands["power"]:
@@ -415,8 +421,8 @@ class Pylips:
         ambihue_status = self.run_command("ambihue_status",None,self.verbose, False)
         if ambihue_status is not None and ambihue_status[0]=='{':
             ambihue_status = json.loads(ambihue_status)
-            if "values" in ambihue_status:
-                ambihue = ambihue_status["values"][0]["value"]["data"]["value"]
+            if "power" in ambihue_status:
+                ambihue = ambihue_status["power"]
                 if self.last_status["ambihue"] != ambihue:
                     self.mqtt.publish(str(self.config["MQTT"]["topic_pylips"]), json.dumps({"status":{"ambihue":ambihue}}), retain = False)
 

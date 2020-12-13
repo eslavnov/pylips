@@ -5,6 +5,9 @@
 		}
 	},
 	"get": {
+    "ambihue_status": {
+			"path": "HueLamp/power"
+		},
 		"current_channel": {
 			"path": "activities/tv"
 		},
@@ -251,43 +254,17 @@
 				}
 			}
 		},
-		"ambihue_status": {
-			"path": "menuitems/settings/current",
-			"body": {
-				"nodes": [{
-					"nodeid": 2131230774
-				}]
-			}
-		},
 		"ambihue_on": {
-			"path": "menuitems/settings/update",
+			"path": "HueLamp/power",
 			"body": {
-				"values": [{
-					"value": {
-						"Nodeid": 2131230774,
-						"Controllable": "true",
-						"Available": "true",
-						"data": {
-							"value": "true"
-						}
-					}
-				}]
-			}
+        "power": "On"
+      }
 		},
 		"ambihue_off": {
-			"path": "menuitems/settings/update",
+			"path": "HueLamp/power",
 			"body": {
-				"values": [{
-					"value": {
-						"Nodeid": 2131230774,
-						"Controllable": "true",
-						"Available": "true",
-						"data": {
-							"value": "false"
-						}
-					}
-				}]
-			}
+        "power": "Off"
+      }
 		},
 		"standby": {
 			"path": "input/key",
@@ -600,16 +577,22 @@
       }
     },
     "input_hdmi_1": {
-      "ga_query": "HDMI 1"
+      "body": {
+        "query": "HDMI 1"
+      }
     },
     "input_hdmi_2": {
-      "ga_query": "HDMI 2"
-    },
+      "body": {
+        "query": "HDMI 2"
+      }    },
     "input_hdmi_3": {
-      "ga_query": "HDMI 3"
-    },
+      "body": {
+        "query": "HDMI 3"
+      }    },
     "input_hdmi_4": {
-      "ga_query": "HDMI 4"
+      "body": {
+        "query": "HDMI 4"
+      }
     }    
 	}
 }
