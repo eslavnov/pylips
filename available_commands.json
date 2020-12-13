@@ -43,12 +43,49 @@
 				"power": "Off"
 			}
 		},
-		"ambilight_video_immersive": {
+		"ambilight_color_hot_lava": {
 			"path": "ambilight/currentconfiguration",
 			"body": {
-				"styleName": "FOLLOW_VIDEO",
+				"styleName": "FOLLOW_COLOR",
 				"isExpert": "false",
-				"menuSetting": "IMMERSIVE"
+				"menuSetting": "HOT_LAVA",
+				"stringValue": "Hot Lava"
+			}
+		},
+		"ambilight_color_warm_white": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_COLOR",
+				"isExpert": "false",
+				"menuSetting": "ISF",
+				"stringValue": "Warm White"
+			}
+		},
+		"ambilight_color_cool_white": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_COLOR",
+				"isExpert": "false",
+				"menuSetting": "PTA_LOUNGE",
+				"stringValue": "Cool White"
+			}
+		},
+		"ambilight_color_fresh_nature": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_COLOR",
+				"isExpert": "false",
+				"menuSetting": "FRESH_NATURE",
+				"stringValue": "Fresh Nature"
+			}
+		},
+		"ambilight_color_deep_water": {
+			"path": "ambilight/currentconfiguration",
+			"body": {
+				"styleName": "FOLLOW_COLOR",
+				"isExpert": "false",
+				"menuSetting": "DEEP_WATER",
+				"stringValue": "Deep Water"
 			}
 		},
 		"ambilight_video_standard": {

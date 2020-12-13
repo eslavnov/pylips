@@ -2,7 +2,7 @@
 Pylips is a Python tool to control Philips TVs (2015+) through their reverse-engineered API. 
 
 1. Supports both Android and non-Android TVs
-1. 80 built-in commands + support for custom "GET" and "POST" requests to the API
+1. 80+ built-in commands + support for custom "GET" and "POST" requests to the API
 1. All commands work on TVs with API version 6, most of them also work for API version 5
 1. Full control of Ambilight including color, brightness, mode and 'Ambilight + Hue'
 1. Allows sending TV status updates and receiving commands over MQTT
@@ -171,7 +171,7 @@ Any passed arguments will override the settings in `settings.ini` without overwr
 1. `ambihue_status` - Returns the current status of 'Ambilight + Hue'
 1. `ambihue_on` - Turns 'Ambilight + Hue' on
 1. `ambihue_off` - Turns 'Ambilight + Hue' off
-1. `ambilight_color` - Sets ambilight color. Requires a valid `--body` argument: `{"hue": 360, "saturation": 100, "brightness": 255}`
+1. `ambilight_color` - Sets ambilight color (in HSB format). Requires a valid `--body` argument: `{"hue": 360, "saturation": 100, "brightness": 255}`
 1. `ambilight_brightness` - Sets ambilight brightness. Requires a valid `--body` argument: `{"value": 10}`
 1. `ambilight_video_immersive` - Sets Ambilight to 'Follow video' (Immersive)
 1. `ambilight_video_standard` - Sets Ambilight to 'Follow video' (Standard)
@@ -180,6 +180,11 @@ Any passed arguments will override the settings in `settings.ini` without overwr
 1. `ambilight_video_game` - Sets Ambilight to 'Follow video' (Game)
 1. `ambilight_video_comfort` - Sets Ambilight to 'Follow video' (Comfort)
 1. `ambilight_video_relax` - Sets Ambilight to 'Follow video' (Relax)
+1. `ambilight_color_hot_lava` - Sets Ambilight to 'Follow color' (Hot lava)
+1. `ambilight_color_warm_white` - Sets Ambilight to 'Follow color' (Warm white)
+1. `ambilight_color_cool_white` - Sets Ambilight to 'Follow color' (Cool white)
+1. `ambilight_color_fresh_nature` - Sets Ambilight to 'Follow color' (Fresh nature)
+1. `ambilight_deep_water` - Sets Ambilight to 'Follow color' (Deep water)
 1. `ambilight_audio_adapt_brightness` - Sets Ambilight to 'Follow audio' (Energy Adaptive Brightness)
 1. `ambilight_audio_adapt_colors` - Sets Ambilight to 'Follow audio' (Energy Adaptive Colors)
 1. `ambilight_audio_vu_meter` - Sets Ambilight to 'Follow audio' (VU Meter)
@@ -337,6 +342,10 @@ adb shell am start -a android.intent.action.VIEW -d content://android.media.tv/p
 ```
 
 ## Change log
+
+### 1.2.0 - 2020-02-28
+**Added**
+- `ambilight_color_hot_lava`, `ambilight_color_warm_white`, `ambilight_color_cool_white`, `ambilight_color_fresh_nature`, `ambilight_color_deep_water` commands
 
 ### 1.1.1 - 2020-02-20
 **Fixed**
