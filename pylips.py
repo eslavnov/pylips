@@ -1,4 +1,4 @@
-# version 1.1.1
+# version 1.3.0
 import platform    
 import subprocess
 import configparser
@@ -300,20 +300,24 @@ class Pylips:
         if command in self.available_commands["get"]:
             return self.get(self.available_commands["get"][command]["path"],verbose)
         elif command in self.available_commands["post"]:
+            # if "ga_query" in self.available_commands["post"][command]:
+            #   ga_body = 
+            #   self.post(self.available_commands["post"][command]["path"],new_body,verbose, callback)
+            #   return self.post()
             if "body" in self.available_commands["post"][command] and body is None:
                 return self.post(self.available_commands["post"][command]["path"],self.available_commands["post"][command]["body"],verbose, callback)
             if "body" in self.available_commands["post"][command] and body is not None:
+                if type(body) is str:
+                    body = json.loads(body)
                 new_body = self.available_commands["post"][command]["body"]
                 if command == "ambilight_brightness":
-                    if type(body) is str:
-                        body = json.loads(body)
                     new_body["values"][0]["value"]["data"] = body
                 elif command == "ambilight_color":
-                    if type(body) is str:
-                        body = json.loads(body)
                     new_body["colorSettings"]["color"]["hue"] = int(body["hue"]*(255/360))
                     new_body["colorSettings"]["color"]["saturation"]=int(body["saturation"]*(255/100))
                     new_body["colorSettings"]["color"]["brightness"]=int(body["brightness"])
+                elif command == "google_assistant":
+                    new_body["intent"]["extras"]["query"] = body["query"]
                 return self.post(self.available_commands["post"][command]["path"],new_body,verbose, callback)
             else:
                 return self.post(self.available_commands["post"][command]["path"], body,verbose, callback)

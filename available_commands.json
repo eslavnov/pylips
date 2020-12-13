@@ -548,6 +548,31 @@
 		},
 		"update_settings": {
 			"path": "menuitems/settings/update"
-		}
+    },
+    "google_assistant": {
+      "path": "activities/launch",
+      "body":  { 
+        "intent": {
+          "extras": {"query": ""}, 
+          "action": "Intent {  act=android.intent.action.ASSIST cmp=com.google.android.katniss/com.google.android.apps.tvsearch.app.launch.trampoline.SearchActivityTrampoline flg=0x10200000 }", 
+          "component": {
+            "packageName":"com.google.android.katniss",
+            "className":"com.google.android.apps.tvsearch.app.launch.trampoline.SearchActivityTrampoline"
+          }
+        }
+      }
+    },
+    "input_hdmi_1": {
+      "ga_query": "HDMI 1"
+    },
+    "input_hdmi_2": {
+      "ga_query": "HDMI 2"
+    },
+    "input_hdmi_3": {
+      "ga_query": "HDMI 3"
+    },
+    "input_hdmi_4": {
+      "ga_query": "HDMI 4"
+    }    
 	}
 }

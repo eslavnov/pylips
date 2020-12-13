@@ -7,7 +7,7 @@ Pylips is a Python tool to control Philips TVs (2015+) through their reverse-eng
 1. Full control of Ambilight including color, brightness, mode and 'Ambilight + Hue'
 1. Allows sending TV status updates and receiving commands over MQTT
 
-The current version of the API does not allow switching input sources anymore (?), use [this tool](https://github.com/eslavnov/android-tv-remote) instead (Android TVs only).
+The current version of the API does not allow switching input sources anymore. For Android TVs with Google Assistant, Pylips can switch between any input sources that your TV has. For Android TVs without Google Assistant, see some options [here](#switching-input-sources)
 
 ## Table of contents ##
 1. [Prerequisites](#prerequisites)
@@ -53,6 +53,7 @@ apiv =                  # will be discovered automatically, but you can override
 user =                  # will be discovered automatically (if required for your TV model), but you can override it here
 pass =                  # will be discovered automatically (if required for your TV model), but you can override it here
 protocol =              # will be discovered automatically, but you can override it here
+ambihue_node =          # will be discovered automatically, but you can override it here
 [MQTT]
 host =                  # your MQTT broker's ip address
 port =                  # your MQTT broker's port
@@ -102,6 +103,12 @@ Any passed arguments will override the settings in `settings.ini` without overwr
 1. `volume` - Returns current volume and mute status
 1. `current_channel` - Returns current channel (if in TV mode)
 1. `current_app` - Returns current app (Android TVs only)
+
+   **TV input (only for TVs with Google Assistant):**
+1. `input_hdmi_1` - Switches TV's input to HDMI 1.
+1. `input_hdmi_2` - Switches TV's input to HDMI 2.
+1. `input_hdmi_3` - Switches TV's input to HDMI 3.
+1. `input_hdmi_4` - Switches TV's input to HDMI 4.
 
    **TV remote keys:**
 1. `standby` - Sends Standby key
@@ -188,6 +195,7 @@ Any passed arguments will override the settings in `settings.ini` without overwr
 1. `launch_app` - Launches an app (Android TVs only). Requires a valid `--body` argument. See [API reference](https://github.com/eslavnov/pylips/wiki/Applications-(GET)) to get a list of installed apps, find your app in this list and use it as a `--body` argument.
 1. `power_on` - Turns on the TV even if it's in a deep sleep mode. You might need to run `allow_power_on` first, although it was not needed for me.
 1. `allow_power_on` - Allows to remotely power on the TV via chromecast requests.
+1. `google_assistant` - Allows to pass requests to Google Assistant if your model supports it. Requires a `--body` argument containing a `query` with the command that you want to pass to Google Assistant. See example below.
 
 **Examples of using the built-in commands:**
 
@@ -220,6 +228,22 @@ Launch Kodi:
 ```
 python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command launch_app --body '{"id":"org.xbmc.kodi","order":0,"intent":{"action":"Intent{act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 pkg=org.xbmc.kodi }","component":{"packageName":"org.xbmc.kodi","className":"org.xbmc.kodi.Splash"}},"label":"Kodi"}'
 ```
+
+Switch input to HDMI 1 using a built-in command (requires Google Assistant):
+```
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command input_hdmi_1
+```
+
+Switch input to any source (for example, SCART) using Google Assistant directly:
+```
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command google_assistant --body '{"query":"SCART"}'
+```
+
+Control connected lights in your house using Google Assistant:
+```
+python3 pylips.py --host %TV's_ip_address% --user %username% --pass %password% --command google_assistant --body '{"query":"Turn on lights"}'
+```
+
 
 ### Custom commands ###
 The tools exposes two general commands to talk to the TV's API: `get` (sends GET request and *gets* back some data like ambilight mode) and `post` (sends POST request that *posts* some data and changes something in the TV - like turning the ambilight off). You can also add custom commands to `available_commands.json`.
@@ -301,6 +325,16 @@ Since no official API documentation is available, I've decided to collect and do
 All endpoints in API reference are tested and fully working unless explicitly marked otherwise. Any comments, new endpoints and fixes to the API reference are incredibly welcome.
 
 [The API reference](https://github.com/eslavnov/Pylips/wiki).
+
+## Switching input sources
+The current version of the API does not allow switching input sources anymore.
+If your TV has Android, you have several options to switch sources:
+1. If your TV supports Google Assistant, you can either use built-in commands in Pylips (`input_hdmi_x`) or use `google_assistant`. In both cases Pylips will send a local request to the Google Assistant running on the TV, which in turn will handle switching the input.
+1. For some models sending keys like `F1`, `F2`, etc. allow to switch sources. You can use `adb` to send these key events to your TV or use this [wrapper](https://github.com/eslavnov/android-tv-remote).
+1. Using adb you can also switch the sources directly. See the example below, the last digit in `HdmiService%2FHW9` indicates an input source (for me `HdmiService%2FHW9` is HDMI 2 and `HdmiService%2FHW10` is HDMI 1).
+```
+adb shell am start -a android.intent.action.VIEW -d content://android.media.tv/passthrough/org.droidtv.hdmiService%2F.HdmiService%2FHW9 -n org.droidtv.zapster/.playtv.activity.PlayTvActivity -f 0x10000000
+```
 
 ## Change log
 
