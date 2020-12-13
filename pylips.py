@@ -149,8 +149,6 @@ class Pylips:
                     print("Connection refused")
                     continue
                 if r.status_code == 200:
-                    print(r.json())
-
                     self.config["TV"]["apiv"]= str(r.json()["api_version"]["Major"])
                     if "featuring" in r.json() and "systemfeatures" in r.json()["featuring"] and "pairing_type" in r.json()["featuring"]["systemfeatures"] and r.json()["featuring"]["systemfeatures"]["pairing_type"] == "digest_auth_pairing":
                         self.config["TV"]["protocol"] = "https://"
@@ -197,7 +195,6 @@ class Pylips:
 
     # pairs with a TV
     def pair_request(self, data, err_count=0):
-        print(data)
         print("https://" + str(self.config["TV"]["host"]) + ":1926/"+str(self.config["TV"]["apiv"])+"/pair/request")
         response={}
         r = session.post("https://" + str(self.config["TV"]["host"]) + ":1926/"+str(self.config["TV"]["apiv"])+"/pair/request", json=data, verify=False, timeout=2)
@@ -235,8 +232,6 @@ class Pylips:
                 print("Resending pair confirm request")
             try:
                 r = session.post("https://" + str(self.config["TV"]["host"]) +":1926/"+str(self.config["TV"]["apiv"])+"/pair/grant", json=data, verify=False, auth=HTTPDigestAuth(self.config["TV"]["user"], self.config["TV"]["pass"]),timeout=2)
-                print (r.request.headers)
-                print (r.request.body)
                 print("Username for subsequent calls is: " + str(self.config["TV"]["user"]))
                 print("Password for subsequent calls is: " + str(self.config["TV"]["pass"]))
                 return print("The credentials are saved in the settings.ini file.")
