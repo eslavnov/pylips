@@ -66,7 +66,7 @@ topic_pylips =          # Pylips will listen for commands to this topic
 topic_status =          # Pylips will send status updates to this topic
 ```
 
-Now turn your TV on and run Pylips without any arguments to complete setting it up (it will discover your TV's API version, port and protocol, and will also pair and save the credentials if required):
+Now turn your TV on and run Pylips without any arguments to complete setting it up (it will discover your TV's API version, port and protocol + pair and save the credentials if required):
 
 `python3 pylips.py`
 
@@ -81,6 +81,10 @@ To pair with the Android TVs we need to create a HMAC signature using an 88-char
 You can load a custom config by specifying its **absolute** path with a `--config` parameter:
 
 `python pylips.py --config '/home/eslavnov/repos/Pylips/some_settings.ini'`
+
+### Migrating from older versions ###
+
+The new version of Pylips is 100% backwards-compatible with the old arguments and commands, so you don't have to change anything to keep using it, but every call will take slightly longer to identify the API version. Follow the instructions for the new users to save your API version in `settings.ini`, then it will run faster. If you want to override the API version check you can also use the `--apiv` parameter (manual mode only). Finally, you still need to follow the instructions for the new users to take advantage of MQTT. 
 
 ## Controlling the TV (manual mode) ##
 You can take advantage of some of the built-in commands or send your own custom commands.
@@ -158,7 +162,7 @@ Any passed arguments will override the settings in `settings.ini` without overwr
 1. `digit_9` - Sends Digit9 key
 
    **TV channels:**
-1. `set_channel` - Turns a specified channel on. Requires a valid `--body` argument, see the [API reference](docs/Chapters/Activities-TV-(GET).md) to get it.
+1. `set_channel` - Turns a specified channel on. Requires a valid `--body` argument, see [API reference](https://github.com/eslavnov/pylips/wiki/Activities-TV-(GET)/) to get it.
 1. `list_channels` - Returns channel list
 1. `list_favorite` - Returns favorite list
 
@@ -194,7 +198,7 @@ Any passed arguments will override the settings in `settings.ini` without overwr
 1. `ambilight_audio_random` - Sets Ambilight to 'Follow audio' (Random Mode)
 
    **Other:**
-1. `launch_app` - Launches an app (Android TVs only). Requires a valid `--body` argument. See the [API reference](docs/Chapters/Applications-(GET).md) to get a list of installed apps, find your app in this list and use it as a `--body` argument.
+1. `launch_app` - Launches an app (Android TVs only). Requires a valid `--body` argument. See [API reference](https://github.com/eslavnov/pylips/wiki/Applications-(GET)) to get a list of installed apps, find your app in this list and use it as a `--body` argument.
 1. `power_on` - Turns on the TV even if it's in a deep sleep mode. You might need to run `allow_power_on` first, although it was not needed for me.
 1. `allow_power_on` - Allows to remotely power on the TV via chromecast requests.
 1. `google_assistant` - Allows to pass requests to Google Assistant if your model supports it. Requires a `--body` argument containing a `query` with the command that you want to pass to Google Assistant. See example below.
@@ -295,7 +299,7 @@ See examples:
 python3 pylips.py --command ambilight_brightness --body '{"value":10}'
 
 # MQTT mode: 
-{"command":"ambilight_brightness", "body":{"value":10}} 
+{"command":"ambilight_brightness", "body":{"value":10} 
 
 
 # POST REQUESTS
@@ -326,7 +330,7 @@ Since no official API documentation is available, I've decided to collect and do
 
 All endpoints in API reference are tested and fully working unless explicitly marked otherwise. Any comments, new endpoints and fixes to the API reference are incredibly welcome.
 
-[The API reference](docs/Home.md).
+[The API reference](https://github.com/eslavnov/Pylips/wiki).
 
 ## Switching input sources
 The current version of the API does not allow switching input sources anymore.
@@ -339,14 +343,6 @@ adb shell am start -a android.intent.action.VIEW -d content://android.media.tv/p
 ```
 
 ## Change log
-
-### 1.3.1 - 2021-01-17
-**Changed**
-- API documention moved from the wiki to the repo. Please feel free to send PRs with improvements!
-
-**Fixed**
-- Malformed JSON in MQTT commands is now properly handled
-- Imroved error handling in API version discovery process
 
 ### 1.3.0 - 2020-12-13
 **Added**
