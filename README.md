@@ -7,7 +7,7 @@ Pylips is a Python tool to control Philips TVs (2015+) through their reverse-eng
 1. Full control of Ambilight including color, brightness, mode and 'Ambilight + Hue'
 1. Allows sending TV status updates and receiving commands over MQTT
 
-The current version of the API does not allow switching input sources anymore. For Android TVs with Google Assistant, Pylips can switch between any input sources that your TV has. For Android TVs without Google Assistant, see some options [here](#switching-input-sources)
+The current version of the API does not allow switching input sources anymore. For Android TVs with Google Assistant, Pylips can switch between any input sources that your TV has. For Android TVs without Google Assistant, see some options [here](#switching-input-sources).
 
 ## Table of contents ##
 1. [Prerequisites](#prerequisites)
@@ -102,10 +102,10 @@ Any passed arguments will override the settings in `settings.ini` without overwr
 1. `current_app` - Returns current app (Android TVs only)
 
    **TV input (only for TVs with Google Assistant):**
-1. `input_hdmi_1` - Switches TV's input to HDMI 1.
-1. `input_hdmi_2` - Switches TV's input to HDMI 2.
-1. `input_hdmi_3` - Switches TV's input to HDMI 3.
-1. `input_hdmi_4` - Switches TV's input to HDMI 4.
+1. `input_hdmi_1` - Switches TV's input to HDMI 1
+1. `input_hdmi_2` - Switches TV's input to HDMI 2
+1. `input_hdmi_3` - Switches TV's input to HDMI 3
+1. `input_hdmi_4` - Switches TV's input to HDMI 4
 
    **TV remote keys:**
 1. `standby` - Sends Standby key
