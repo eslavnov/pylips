@@ -1,4 +1,4 @@
-# version 1.3.0
+# version 1.3.1
 import platform    
 import subprocess
 import configparser
@@ -149,7 +149,11 @@ class Pylips:
                     print("Connection refused")
                     continue
                 if r.status_code == 200:
-                    self.config["TV"]["apiv"]= str(r.json()["api_version"]["Major"])
+                    if "api_version" in r.json():
+                        self.config["TV"]["apiv"] = str(r.json()["api_version"]["Major"])
+                    else:
+                        print("Could not find a valid API version! Pylips will try to use '", api_version, "'" )
+                        self.config["TV"]["apiv"] = api_version
                     if "featuring" in r.json() and "systemfeatures" in r.json()["featuring"] and "pairing_type" in r.json()["featuring"]["systemfeatures"] and r.json()["featuring"]["systemfeatures"]["pairing_type"] == "digest_auth_pairing":
                         self.config["TV"]["protocol"] = "https://"
                         self.config["TV"]["port"] = "1926"
@@ -341,8 +345,11 @@ class Pylips:
             print("Connected to MQTT broker at", self.config["MQTT"]["host"])
             client.subscribe(self.config["MQTT"]["topic_pylips"])
         def on_message(client, userdata, msg):
-            if str(msg.topic)==self.config["MQTT"]["topic_pylips"]:
-                message = json.loads(msg.payload.decode('utf-8'))
+                if str(msg.topic)==self.config["MQTT"]["topic_pylips"]:
+                  try:
+                    message = json.loads(msg.payload.decode('utf-8'))
+                  except:
+                    return print("Invalid JSON in mqtt message:", msg.payload.decode('utf-8'))
                 if "status" in message:
                     self.mqtt_update_status(message["status"])
                 if "command" in message:
