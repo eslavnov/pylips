@@ -1,4 +1,4 @@
-# version 1.3.1
+# version 1.3.2
 import platform    
 import subprocess
 import configparser
@@ -153,7 +153,7 @@ class Pylips:
                         self.config["TV"]["apiv"] = str(r.json()["api_version"]["Major"])
                     else:
                         print("Could not find a valid API version! Pylips will try to use '", api_version, "'" )
-                        self.config["TV"]["apiv"] = api_version
+                        self.config["TV"]["apiv"] = str(api_version)
                     if "featuring" in r.json() and "systemfeatures" in r.json()["featuring"] and "pairing_type" in r.json()["featuring"]["systemfeatures"] and r.json()["featuring"]["systemfeatures"]["pairing_type"] == "digest_auth_pairing":
                         self.config["TV"]["protocol"] = "https://"
                         self.config["TV"]["port"] = "1926"
