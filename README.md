@@ -340,13 +340,17 @@ adb shell am start -a android.intent.action.VIEW -d content://android.media.tv/p
 
 ## Change log
 
+### 1.3.2 - 2021-01-30
+**Fixed**
+- Pylips now won't crash on older models (API version 1; most of the commands will work but not all)
+
 ### 1.3.1 - 2021-01-17
 **Changed**
 - API documention moved from the wiki to the repo. Please feel free to send PRs with improvements!
 
 **Fixed**
 - Malformed JSON in MQTT commands is now properly handled
-- Imroved error handling in API version discovery process
+- Improved error handling in API version discovery process
 
 ### 1.3.0 - 2020-12-13
 **Added**
