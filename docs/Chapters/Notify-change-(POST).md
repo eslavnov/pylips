@@ -1,7 +1,10 @@
 # REST API Method: POST notifychange
-As far as I can tell, sending a list of API endpoints with their current status to this endpoint should return an object with the updated status of these endpoints. The problem is that I could not get this endpoint to work despite trying various settings, timeouts, etc. Moreover, looking at the captured traffic from the official Philips TV remote, I can see that this endpoint is failing most of the time even for Philips. Either I completely misunderstand how it should be used or it is broken.
+Sending the current values of other endpoints to the endpoint will block the response from the endpoint until either the request times out, or one of the fields have changed. If a field is different from supplied value, the endpoint will directly return with it's current values. It will only return the fields that is different from the supplied values.
 
-Also notice that it runs on port 1925 on a http protocol on ALL Philips TVs regardless of Android support.
+Also notice that it runs on port 1925 on a http protocol on ALL Philips TVs regardless of Android support. It also seem available on 1926 on https protocol.
+
+Noticed issues:
+ * The "audio/volume" endpoint doesn't seem to work.
 
 ## URL
 **Android TVs**:
