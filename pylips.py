@@ -1,4 +1,4 @@
-# version 1.3.2
+# version 1.3.2 - Enhanced with MQTT response topic
 import platform    
 import subprocess
 import configparser
@@ -33,7 +33,7 @@ parser.add_argument("--path", dest="path", help="API's endpoint path")
 parser.add_argument("--body", dest="body", help="Body for post requests")
 parser.add_argument("--verbose", dest="verbose", help="Display feedback")
 parser.add_argument("--apiv", dest="apiv", help="Api version", default="")
-parser.add_argument("--config", dest="config", help="Path to config file", default=os.path.dirname(os.path.realpath(__file__))+os.path.sep+"settings.ini")
+parser.add_argument("--config", dest="config", help="Path to config file", default=os.getcwd()+os.path.sep+"settings.ini")
 
 args = parser.parse_args()
 
@@ -93,8 +93,11 @@ class Pylips:
                     return print("IP", self.config["TV"]["host"], "seems to be offline. Exiting...")
 
         # load API commands
-        with open(os.path.dirname(os.path.realpath(__file__))+"/available_commands.json") as json_file:  
+        with open(os.getcwd()+os.path.sep+"available_commands.json") as json_file:
             self.available_commands = json.load(json_file)
+
+        # initialize last_status for MQTT (used by both listener and updater)
+        self.last_status = {"powerstate": None, "volume":None, "muted":False, "cur_app":None, "ambilight":None, "ambihue":False}
 
         # start MQTT listener and updater if required
         if (len(sys.argv)==1 or (len(sys.argv)==3 and sys.argv[1] == "--config")) and self.config["DEFAULT"]["mqtt_listen"] == "True":
@@ -103,7 +106,6 @@ class Pylips:
                     self.start_mqtt_listener()
                     if self.config["DEFAULT"]["mqtt_update"] == "True":
                         # Update TV status and publish any changes
-                        self.last_status = {"powerstate": None, "volume":None, "muted":False, "cur_app":None, "ambilight":None, "ambihue":False}
                         self.start_mqtt_updater(self.verbose)
                 else:
                     print("Please specify host in MQTT section in settings.ini to use MQTT")
@@ -246,6 +248,24 @@ class Pylips:
         else:
             return print("The API is unreachable. Try restarting your TV and pairing again")
 
+    # publishes response to MQTT response topic
+    def mqtt_publish_response(self, command, response_data):
+        """Publish command response to MQTT response topic if configured"""
+        if hasattr(self, 'mqtt') and "MQTT" in self.config and "topic_response" in self.config["MQTT"]:
+            response_topic = self.config["MQTT"]["topic_response"]
+            if len(response_topic.strip()) > 0:
+                response_payload = {
+                    "command": command,
+                    "timestamp": time.time(),
+                    "response": response_data
+                }
+                try:
+                    self.mqtt.publish(response_topic, json.dumps(response_payload), retain=False)
+                    if self.verbose:
+                        print(f"Published response to {response_topic}")
+                except Exception as e:
+                    print(f"Error publishing response: {str(e)}")
+
     # sends a general GET request
     def get(self, path, verbose=True, err_count=0, print_response=True):
         while err_count < int(self.config["DEFAULT"]["num_retries"]):
@@ -341,36 +361,89 @@ class Pylips:
 
     # starts MQTT listener that accepts Pylips commands               
     def start_mqtt_listener(self):
-        def on_connect(client, userdata, flags, rc):
+        def on_connect(client, userdata, flags, rc, properties=None):
             print("Connected to MQTT broker at", self.config["MQTT"]["host"])
             client.subscribe(self.config["MQTT"]["topic_pylips"])
-        def on_message(client, userdata, msg):
+        def on_message(client, userdata, msg, properties=None):
                 if str(msg.topic)==self.config["MQTT"]["topic_pylips"]:
                   try:
                     message = json.loads(msg.payload.decode('utf-8'))
                   except:
+                    error_msg = {"error": "Invalid JSON", "payload": msg.payload.decode('utf-8')}
+                    self.mqtt_publish_response("parse_error", error_msg)
                     return print("Invalid JSON in mqtt message:", msg.payload.decode('utf-8'))
+                    
                 if "status" in message:
                     self.mqtt_update_status(message["status"])
+                    
                 if "command" in message:
                     body=None
                     path=""
+                    command_name = message["command"]
+                    
                     if "body" in message:
                         body = message["body"]
                     if "path" in message:
                         path = message["path"]
-                    if message["command"] == "get":
-                        if len(path)==0:
-                            return print("Please provide a 'path' argument")
-                        self.get(path,self.verbose,0,False)
-                    elif message["command"] == "post":
-                        if len(path)==0:
-                            return print("Please provide a 'path' argument")
-                        self.post(path, body, self.verbose)
-                    elif message["command"] != "post" and message["command"] != "get":
-                        self.run_command(message["command"],body, self.verbose)
+                        
+                    try:
+                        result = None
+                        
+                        if command_name == "get":
+                            if len(path)==0:
+                                error_msg = {"error": "Missing 'path' argument"}
+                                self.mqtt_publish_response(command_name, error_msg)
+                                return print("Please provide a 'path' argument")
+                            result = self.get(path, self.verbose, 0, False)
+                            
+                        elif command_name == "post":
+                            if len(path)==0:
+                                error_msg = {"error": "Missing 'path' argument"}
+                                self.mqtt_publish_response(command_name, error_msg)
+                                return print("Please provide a 'path' argument")
+                            result = self.post(path, body, self.verbose)
+                                
+                        else:
+                            result = self.run_command(command_name, body, self.verbose)
+                        
+                        # Parse and publish result
+                        if result:
+                            try:
+                                result_json = json.loads(result)
+                                response_data = {
+                                    "command": command_name,
+                                    "path": path if path else None,
+                                    "body": body if body else None,
+                                    "result": result_json
+                                }
+                            except (json.JSONDecodeError, ValueError):
+                                response_data = {
+                                    "command": command_name,
+                                    "path": path if path else None,
+                                    "body": body if body else None,
+                                    "result": result
+                                }
+                            self.mqtt_publish_response(command_name, response_data)
+                        else:
+                            response_data = {
+                                "command": command_name,
+                                "path": path if path else None,
+                                "body": body if body else None,
+                                "result": None
+                            }
+                            self.mqtt_publish_response(command_name, response_data)
+                            
+                    except Exception as e:
+                        error_msg = {
+                            "error": str(e),
+                            "command": command_name,
+                            "path": path if path else None,
+                            "body": body if body else None
+                        }
+                        self.mqtt_publish_response(command_name, error_msg)
+                        print(f"Error executing command {command_name}: {str(e)}")
 
-        self.mqtt = mqttc.Client()
+        self.mqtt = mqttc.Client(mqttc.CallbackAPIVersion.VERSION2)
         self.mqtt.on_connect = on_connect
         self.mqtt.on_message = on_message
 
