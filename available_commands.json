@@ -577,22 +577,56 @@
       }
     },
     "input_hdmi_1": {
-      "body": {
-        "query": "HDMI 1"
+      "path": "activities/launch"
+      "body":  { 
+        "intent": {
+          "extras": {"uri": "content://android.media.tv/passthrough/com.mediatek.tvinput%2F.hdmi.HDMIInputService%2FHW5"}, 
+          "action": "org.droidtv.playtv.SELECTURI", 
+          "component": {
+            "packageName":"org.droidtv.playtv",
+            "className":"org.droidtv.playtv.PlayTvActivity"
+          }
+        }
       }
     },
     "input_hdmi_2": {
-      "body": {
-        "query": "HDMI 2"
-      }    },
-    "input_hdmi_3": {
-      "body": {
-        "query": "HDMI 3"
-      }    },
-    "input_hdmi_4": {
-      "body": {
-        "query": "HDMI 4"
+      "path": "activities/launch"
+      "body":  { 
+        "intent": {
+          "extras": {"uri": "content://android.media.tv/passthrough/com.mediatek.tvinput%2F.hdmi.HDMIInputService%2FHW6"}, 
+          "action": "org.droidtv.playtv.SELECTURI", 
+          "component": {
+            "packageName":"org.droidtv.playtv",
+            "className":"org.droidtv.playtv.PlayTvActivity"
+          }
+        }
       }
-    }    
+    },
+    "input_hdmi_3": {
+      "path": "activities/launch"
+      "body":  { 
+        "intent": {
+          "extras": {"uri": "content://android.media.tv/passthrough/com.mediatek.tvinput%2F.hdmi.HDMIInputService%2FHW7"}, 
+          "action": "org.droidtv.playtv.SELECTURI", 
+          "component": {
+            "packageName":"org.droidtv.playtv",
+            "className":"org.droidtv.playtv.PlayTvActivity"
+          }
+        }
+      }
+    },
+    "input_hdmi_4": {
+      "path": "activities/launch"
+      "body":  { 
+        "intent": {
+          "extras": {"uri": "content://android.media.tv/passthrough/com.mediatek.tvinput%2F.hdmi.HDMIInputService%2FHW8"}, 
+          "action": "org.droidtv.playtv.SELECTURI", 
+          "component": {
+            "packageName":"org.droidtv.playtv",
+            "className":"org.droidtv.playtv.PlayTvActivity"
+          }
+        }
+      }
+    },
 	}
 }
