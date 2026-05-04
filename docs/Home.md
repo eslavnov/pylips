@@ -60,6 +60,7 @@ Send requests with the tool's `get` or `post` commands or use cURL:
 
    **TV channels:** 
 1. [Channel list (GET)](Chapters/Channel-list-(GET).md)
+1. [Favourites (GET/POST/PUT)](Chapters/Favourites-(GET-POST-PUT).md)
 1. [EPG source (GET)](Chapters/EPG-source-(GET).md)
 1. [Recordings (GET)](Chapters/Recordings-(GET).md)
 
