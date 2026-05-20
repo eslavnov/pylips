@@ -10,7 +10,9 @@ Pylips is a Python tool to control Philips TVs (2015+) through their reverse-eng
 The current version of the API does not allow switching input sources anymore. For Android TVs with Google Assistant, Pylips can switch between any input sources that your TV has. For Android TVs without Google Assistant, see some options [here](#switching-input-sources).
 
 ## Table of contents ##
-1. [Prerequisites](#prerequisites)
+1. [Installation](#installation)
+    1. [Locally](#local)
+    1. [Docker](#docker)
 1. [Setting up Pylips](#setting-up-pylips)
     1. [New users](#new-users)
     1. [Migrating from older versions](#migrating-from-older-versions)
@@ -25,7 +27,9 @@ The current version of the API does not allow switching input sources anymore. F
 1. [Acknowledgements](#acknowledgements)
 1. [Contact details](#contact-details)
 
-## Prerequisites
+## Installation
+
+### Local
 
 Provided that you have python (version 3+) on your system, install all the dependencies first:
 
@@ -34,6 +38,31 @@ pip3 install -r requirements.txt
 ```
 
 You may have to use `pip` and `python` instead of `pip3` and `python3` depending on how these tools are installed on your system.
+
+### Docker
+
+Especially if you want to run pylips continuously to provide the functionality via MQTT, you might want to dockerize pylips.
+
+You need to build the image
+
+```bash
+docker build -t pylips:latest .
+```
+
+and then run it, e.g.,
+
+```bash
+docker run pylips:latest --host 10.0.1.100 --user user --pass password --command powerstate
+```
+
+This requires you to hand-over the `host`, `user` and `pass` parameter every time ([see](#controlling-the-tv-manual-mode)).
+Alternatively, you can use the `settings.ini` file ([see](#new-users)) and mount it in the docker container
+
+```bash
+docker run -v $(pwd)/settings.ini:/usr/src/app/settings.ini pylips:latest
+```
+
+An example docker compose file is given in `docker-compose.yml.example`.
 
 ## Setting up Pylips
 

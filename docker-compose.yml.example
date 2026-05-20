@@ -1,0 +1,6 @@
+services:
+  pylips:
+    build: ./
+    volumes:
+      - ./settings.ini:/usr/src/app/settings.ini
+    restart: unless-stopped
