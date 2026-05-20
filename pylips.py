@@ -135,32 +135,36 @@ class Pylips:
         return subprocess.call(command) == 0
 
     # finds API version, saves it to settings.ini (["TV"]["apiv"]) and returns True if successful.
-    def find_api_version(self, verbose=True, possible_ports=[1925], possible_api_versions=[6,5,1]):
+    def find_api_version(self, verbose=True, possible_ports=[1925,1926], possible_protocols=["http://","https://"], possible_api_versions=[6,5,1]):
         if verbose:
             print ("Checking API version and port...")
-        protocol="http://"
-        for port in possible_ports:
-            for api_version in possible_api_versions:
-                try:
-                    if verbose:
-                        print("Trying", str(protocol) + str(self.config["TV"]["host"]) + ":" + str(port)+"/" + str(api_version)+"/system")
-                    r = session.get(str(protocol) + str(self.config["TV"]["host"]) + ":" + str(port)+"/" + str(api_version)+"/system", verify=False, timeout=2)
-                except requests.exceptions.ConnectionError:
-                    print("Connection refused")
-                    continue
-                if r.status_code == 200:
-                    if "api_version" in r.json():
-                        self.config["TV"]["apiv"] = str(r.json()["api_version"]["Major"])
-                    else:
-                        print("Could not find a valid API version! Pylips will try to use '", api_version, "'" )
-                        self.config["TV"]["apiv"] = str(api_version)
-                    if "featuring" in r.json() and "systemfeatures" in r.json()["featuring"] and "pairing_type" in r.json()["featuring"]["systemfeatures"] and r.json()["featuring"]["systemfeatures"]["pairing_type"] == "digest_auth_pairing":
-                        self.config["TV"]["protocol"] = "https://"
-                        self.config["TV"]["port"] = "1926"
-                    else:
-                        self.config["TV"]["protocol"] = "http://"
-                        self.config["TV"]["port"] = "1925"
-                    return True
+        for protocol in possible_protocols:    
+            for port in possible_ports:
+                for api_version in possible_api_versions:
+                    try:
+                        if verbose:
+                            print("Trying", str(protocol) + str(self.config["TV"]["host"]) + ":" + str(port)+"/" + str(api_version)+"/system")
+                        r = session.get(str(protocol) + str(self.config["TV"]["host"]) + ":" + str(port)+"/" + str(api_version)+"/system", verify=False, timeout=2)
+                    except:
+                        print("Connection error")
+                        continue
+                    if r.status_code == 200:
+                        try:
+                            if "api_version" in r.json():
+                                self.config["TV"]["apiv"] = str(r.json()["api_version"]["Major"])
+                            else:
+                                print("Could not find a valid API version! Pylips will try to use '", api_version, "'" )
+                                self.config["TV"]["apiv"] = str(api_version)
+                            if "featuring" in r.json() and "systemfeatures" in r.json()["featuring"] and "pairing_type" in r.json()["featuring"]["systemfeatures"] and r.json()["featuring"]["systemfeatures"]["pairing_type"] == "digest_auth_pairing":
+                                self.config["TV"]["protocol"] = "https://"
+                                self.config["TV"]["port"] = "1926"
+                            else:
+                                self.config["TV"]["protocol"] = "http://"
+                                self.config["TV"]["port"] = "1925"
+                            return True
+                        except:
+                            print("JSON error")
+                            continue
         return False
 
     # returns True if already paired or using non-Android TVs.
